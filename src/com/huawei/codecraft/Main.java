@@ -122,6 +122,7 @@ public class Main {
                 if(wb == null)  robotsPath.add(new ArrayList<>());
                 else{
                     int[] startXY = robot.getMatXY();
+                    robot.changeMapXY(map, startXY);
                     int[] stopXY;
                     if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
                         stopXY = new int[]{wb.getxMap(), wb.getyMap()};

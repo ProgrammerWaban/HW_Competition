@@ -124,6 +124,28 @@ public class Robot {
         return a;
     }
 
+    public int[] changeMapXY(int[][] map, int[] a) {
+        //如果机器人卡在一个对角线中间，则需要根据机器人中心点位置重新更改落点格子坐标
+        if (map[a[0] + 1][a[1] + 1] == -1 && map[a[0] - 1][a[1] - 1] == -1) {
+            if (y > a[0] * 0.5) {
+                a[0]--;
+                a[1]++;
+            } else {
+                a[0]++;
+                a[1]--;
+            }
+        } else if (map[a[0] - 1][a[1] + 1] == -1 && map[a[0] + 1][a[1] - 1] == -1) {
+            if (y > a[0] * 0.5) {
+                a[0]--;
+                a[1]--;
+            } else {
+                a[0]++;
+                a[1]++;
+            }
+        }
+        return a;
+    }
+
     //往目的地所需设置的前进速度和旋转速度
     private double wantForward = 1;
     private double wantRotate = 0.2;

@@ -270,18 +270,41 @@ public class SearchAlgorithm {
                 if(d[1] == 1){
                     if(newX + 1 >= map.length || map[newX + 1][newY] == -1)   return false;
                     if(nowX + 1 >= map.length || map[nowX + 1][nowY] == -1)   return false;
+                    if(nowX - 1 >= 0 && nowY + 1 < map[0].length && map[nowX - 1][nowY + 1] == -1 && nowX + 1 < map.length && nowY - 1 >= 0 && map[nowX + 1][nowY - 1] == -1){
+                        int parentX = parent[nowX][nowY][0];
+                        int parentY = parent[nowX][nowY][1];
+                        if((parentX == nowX - 1 && parentY == nowY - 1) || (parentX == nowX - 1 && parentY == nowY))    return false;
+                    }
                 }
                 if(d[1] == -1){
                     if(newX - 1 < 0 || map[newX - 1][newY] == -1)   return false;
                     if(nowX - 1 < 0 || map[nowX - 1][nowY] == -1)   return false;
+                    if(nowY + 1 < map[0].length && map[nowX - 1][nowY + 1] == -1 && nowX + 1 < map.length && nowY - 1 >= 0 && map[nowX + 1][nowY - 1] == -1){
+                        int parentX = parent[nowX][nowY][0];
+                        int parentY = parent[nowX][nowY][1];
+                        if(parentX == nowX && parentY == nowY)  return true;
+                        if((parentX == nowX + 1 && parentY == nowY + 1) || (parentX == nowX + 1 && parentY == nowY))    return false;
+                    }
                 }
                 if(d[0] == 1){
                     if(newY - 1 < 0 || map[newX][newY - 1] == -1)   return false;
                     if(nowY - 1 < 0 || map[nowX][nowY - 1] == -1)   return false;
+                    if(nowX + 1 < map.length && nowY + 1 < map[0].length && map[nowX + 1][nowY + 1] == -1 && nowX - 1 >= 0 && map[nowX - 1][nowY - 1] == -1){
+                        int parentX = parent[nowX][nowY][0];
+                        int parentY = parent[nowX][nowY][1];
+                        if(parentX == nowX && parentY == nowY)  return true;
+                        if((parentX == nowX - 1 && parentY == nowY + 1) || (parentX == nowX && parentY == nowY + 1))    return false;
+                    }
                 }
                 if(d[0] == -1){
                     if(newY + 1 >= map[0].length || map[newX][newY + 1] == -1)   return false;
                     if(nowY + 1 >= map[0].length || map[nowX][nowY + 1] == -1)   return false;
+                    if(nowX + 1 < map.length && nowY + 1 < map[0].length && map[nowX + 1][nowY + 1] == -1 && nowX - 1 >= 0 && nowY - 1 >= 0 && map[nowX - 1][nowY - 1] == -1){
+                        int parentX = parent[nowX][nowY][0];
+                        int parentY = parent[nowX][nowY][1];
+                        if(parentX == nowX && parentY == nowY)  return true;
+                        if((parentX == nowX + 1 && parentY == nowY - 1) || (parentX == nowX && parentY == nowY - 1))    return false;
+                    }
                 }
             }
         }
