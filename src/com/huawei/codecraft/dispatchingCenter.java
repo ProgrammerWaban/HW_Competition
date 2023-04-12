@@ -366,7 +366,7 @@ public class dispatchingCenter {
         //返回[dest, nextDest, isBook, value]
         //帧数
         int frame = Main.tl.get();
-        int remainFrame = 15000 - frame;
+        int remainFrame = 12000 - frame;
 
         int destinationID = -1;
         int nextDestinationID = -1;
@@ -520,7 +520,7 @@ public class dispatchingCenter {
         //返回 [dest, isBook, value]
         //帧数
         int frame = Main.tl.get();
-        int remainFrame = 15000 - frame;
+        int remainFrame = 12000 - frame;
 
         int destination = -1;
         int isBook = 0;
