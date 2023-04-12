@@ -116,7 +116,7 @@ public class dispatchingCenter {
                 robotsToSell.add(robotId);
             }
         }
-        findRoadToSell(robotsToSell, robots, workbenches);
+        //findRoadToSell(robotsToSell, robots, workbenches);
         findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
     }
 
