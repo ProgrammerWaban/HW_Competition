@@ -13,6 +13,7 @@ public class Robot {
     private double intendAngle;
     private double x;
     private double y;
+    private double[] radar;
 
     public Robot(int workStationID, int goodID, double timeCoef, double collideCoef, double rotate, double lineSpend_x, double lineSpend_y, double intendAngle, double x, double y) {
         this.workStationID = workStationID;
@@ -105,6 +106,14 @@ public class Robot {
 
     public void setY(double y) {
         this.y = y;
+    }
+
+    public double[] getRadar() {
+        return radar;
+    }
+
+    public void setRadar(double[] radar) {
+        this.radar = radar;
     }
 
     //根据实际坐标返回二维数组的下标

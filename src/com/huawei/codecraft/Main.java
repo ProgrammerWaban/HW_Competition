@@ -2,6 +2,7 @@ package com.huawei.codecraft;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class Main {
     private static final PrintStream outStream = new PrintStream(new BufferedOutputStream(System.out), true);
 
     public static ThreadLocal<Integer> tl = new ThreadLocal<>();
+    private static String team = "";  //表示红蓝双方
     public static ThreadLocal<Integer> who = new ThreadLocal<>();
     private static dispatchingCenter dc = new dispatchingCenter();
     private static ArrayList<Workbench> workbenches = new ArrayList<>();
@@ -217,29 +219,43 @@ public class Main {
                 dc.constructMapWB(WBList);
                 return true;
             }
-            // do something;
-            for(int i = 0; i < line.length(); i++){
-                char c = line.charAt(i);
-                if(c == '#')    map[x][i] = -1;
-                else if(c == '.' || c == 'A')    map[x][i] = -2;
-                else{
-                    Workbench newWB = new Workbench();
-                    newWB.setID(Integer.parseInt("" + c));
-                    newWB.setNeeds();
-                    newWB.setxMap(x);
-                    newWB.setyMap(i);
-                    workbenches.add(newWB);
-                    map[x][i] = workbenches.size() - 1;
-                    WBList.add(Integer.parseInt("" + c));
+            if ("BLUE".equals(line) || "RED".equals(line)) {
+                team = line;
+            } else {
+                // do something;
+                for (int i = 0; i < line.length(); i++) {
+                    char c = line.charAt(i);
+                    if (c == '#') map[x][i] = -1;
+                    else if (c == '.' || c == 'A' || c == 'B') map[x][i] = -2;
+                    else if ("BLUE".equals(team) && c >= '1' && c <= '9') {
+                        Workbench newWB = new Workbench();
+                        newWB.setID(Integer.parseInt("" + c));
+                        newWB.setNeeds();
+                        newWB.setxMap(x);
+                        newWB.setyMap(i);
+                        workbenches.add(newWB);
+                        map[x][i] = workbenches.size() - 1;
+                        WBList.add(Integer.parseInt("" + c));
+                    } else if ("RED".equals(team) && c >= 'a' && c <= 'i') {
+                        Workbench newWB = new Workbench();
+                        newWB.setID(Integer.parseInt("" + (c - 'a' + 1)));
+                        newWB.setNeeds();
+                        newWB.setxMap(x);
+                        newWB.setyMap(i);
+                        workbenches.add(newWB);
+                        map[x][i] = workbenches.size() - 1;
+                        WBList.add(Integer.parseInt("" + (c - 'a' + 1)));
+                    }
                 }
+                x--;
             }
-            x--;
         }
         return false;
     }
 
     private static boolean readUtilOK() throws IOException {
         int i = 0;
+        int j = 0; //用来遍历robots数组，存雷达信息
         String line;
         while ((line = inStream.readLine()) != null) {
             if ("OK".equals(line)) {
@@ -265,6 +281,10 @@ public class Main {
                         Double.parseDouble(s[6]), Double.parseDouble(s[7]), Double.parseDouble(s[8]),
                         Double.parseDouble(s[9]));
                 robots.add(robot);
+            } else if (s.length == 360) {
+                double[] doubles = Arrays.asList(s).stream().mapToDouble(Double::parseDouble).toArray();
+                robots.get(j).setRadar(doubles);
+                j++;
             }
         }
         return false;
