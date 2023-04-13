@@ -399,6 +399,17 @@ public class dispatchingCenter {
                         int nn = wb1.getNeeds().size() - n;
                         futureValue /= nn;
                         double totalValue = goodValue + futureValue;
+                        //如果7缺一个原材料就提高对应的权值
+                        if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
+                            List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
+                            for(Integer l1 : list1){
+                                Workbench wb2 = workbenches.get(l1);
+                                if(!Tool.changeRawToList(wb2.getRaw()).contains(wb1.getID()) && wb2.getNeeds().size() - Tool.changeRawToList(wb2.getRaw()).size() == 1){
+                                    totalValue += valueArray[wb2.getID()];
+                                    break;
+                                }
+                            }
+                        }
                         //出售赚的钱 / 总路径长度     取最大的
                         double valuePerDistance = totalValue / robotToSellDistance;
                         if(valuePerDistance > maxValuePerDistance){
@@ -439,6 +450,17 @@ public class dispatchingCenter {
                             int nn = wb1.getNeeds().size() - n;
                             futureValue /= nn;
                             double totalValue = goodValue + futureValue;
+                            //如果7缺一个原材料就提高对应的权值
+                            if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
+                                List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
+                                for(Integer l1 : list1){
+                                    Workbench wb2 = workbenches.get(l1);
+                                    if(!Tool.changeRawToList(wb2.getRaw()).contains(wb1.getID()) && wb2.getNeeds().size() - Tool.changeRawToList(wb2.getRaw()).size() == 1){
+                                        totalValue += valueArray[wb2.getID()];
+                                        break;
+                                    }
+                                }
+                            }
                             //出售赚的钱 / 总路径长度     取最大的
                             double valuePerDistance = totalValue / robotToSellDistance;
                             if(valuePerDistance > maxValuePerDistance){
@@ -543,6 +565,17 @@ public class dispatchingCenter {
                 int nn = wb.getNeeds().size() - n;
                 futureValue /= nn;
                 double totalValue = goodValue + futureValue;
+                //如果7缺一个原材料就提高对应的权值
+                if(goodID == 1 || goodID == 2 || goodID == 3){
+                    List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb.getID()), getWBXListByGoodID(wb.getID()));
+                    for(Integer l1 : list1){
+                        Workbench wb2 = workbenches.get(l1);
+                        if(!Tool.changeRawToList(wb2.getRaw()).contains(wb.getID()) && wb2.getNeeds().size() - Tool.changeRawToList(wb2.getRaw()).size() == 1){
+                            totalValue += valueArray[wb2.getID()];
+                            break;
+                        }
+                    }
+                }
                 //出售赚的钱 / 总路径长度     取最大的
                 double valuePerDistance = totalValue / distance;
                 if(valuePerDistance > maxValuePerDistance){
