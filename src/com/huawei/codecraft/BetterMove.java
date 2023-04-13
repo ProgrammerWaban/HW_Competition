@@ -70,7 +70,7 @@ public class BetterMove {
             if (omega < Math.PI) {
                 //omega表示角速度
                 robot.setWantRotate(omega);
-                robot.setWantForward(6);
+                robot.setWantForward(7);
             } else {
                 if (distance < 1) {
                     robot.setWantRotate(Math.PI);
@@ -165,7 +165,7 @@ public class BetterMove {
             double omega = 12 * Math.sin(theta) / distance;
             if (omega < Math.PI) {
                 robot.setWantRotate(omega * 3 + 1);
-                robot.setWantForward(6);
+                robot.setWantForward(7);
             } else {
                 if (distance < 2) {
                     robot.setWantRotate(Math.PI);
