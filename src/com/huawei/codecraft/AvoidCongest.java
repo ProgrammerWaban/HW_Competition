@@ -7,7 +7,7 @@ import java.util.List;
 
 public class AvoidCongest {
 
-    // 判断当前位置是否在单行道上
+    // 判断当前位置是否在单行道上, 距离为1的对角线不能有障碍，距离为2的对角线最多有一个障碍
     public static boolean iSInSingleWay(int y,int x,int [][]map){
         // 横向两个格子和纵向两个格子没有障碍物
         int count = 0;
@@ -32,13 +32,61 @@ public class AvoidCongest {
         else if(count1<3)
             return true;
 
-        if(((y+2< map.length&&map[y+2][x]!=-1)||(y-2>=0&&map[y-2][x]!=-1))&&
-                ((x+2< map.length&&map[y][x+2]!=-1)||(x-2>=0&&map[y][x-2]!=-1))
-        )
-        {
-            return false;
+        return false;
+
+    }
+
+    // length只少为 1, 已y,x为起点，direction 方向长度在length 内的位置是否有障碍点
+    public static boolean isLineBarrier(int y,int x,int []direction,int length,int [][]map){
+        int next_y = y;
+        int next_x = x;
+        for(int i=0;i<length;i++){
+            next_y = next_y + direction[0];
+            next_x = next_x + direction[1];
+            if(next_y >= map.length || next_y < 0 || next_x < 0 || next_x >= map[0].length || map[next_y][next_x]==-1)  return true;
         }
-        return true;
+        return false;
+    }
+
+
+    public static boolean iSInSingleWay(List<int[]> path,int [][]map) {
+        int path_length = path.size();
+        if(path_length<2){
+            int y = path.get(0)[0];
+            int x = path.get(0)[1];
+            return iSInSingleWay(y,x,map);
+        }
+        int available_length = Math.min(path_length,4);
+        for(int i=0;i<available_length-1;i++){
+            int y = path.get(i)[0];
+            int x = path.get(i)[1];
+            int next_y = path.get(i+1)[0];
+            int next_x = path.get(i+1)[1];
+            // 移动方向
+            int [] move_direction = new int []{next_y-y,next_x-x};
+            int [] vertical_direction_1, vertical_direction_2;
+            if(move_direction[0]==0||move_direction[1]==0){
+                vertical_direction_1 = new int []{move_direction[1],move_direction[0]};
+                vertical_direction_2 = new int [] {-move_direction[1],-move_direction[0]};
+            }else{
+                vertical_direction_1 = new int []{move_direction[0],-move_direction[1]};
+                vertical_direction_2 = new int [] {-move_direction[0],move_direction[1]};
+            }
+            if(isLineBarrier(y,x,vertical_direction_1,2,map)||isLineBarrier(y,x,vertical_direction_2,2,map)){
+                return true;
+            }
+
+            if(move_direction[0]!=0&&move_direction[1]!=0) {
+                int temp_y = y+move_direction[0];
+                int temp_x = x+move_direction[1];
+                if(isLineBarrier(temp_y,x,vertical_direction_1,1,map)||isLineBarrier(y,temp_x,vertical_direction_2,1,map)){
+                    return true;
+                }
+            }
+
+        }
+        return false;
+
     }
 
     // 判读一个坐标是否在路径上，在路径上的定义为横向距离为1，纵向距离为0，横向距离为0，纵向距离为1，或横向距离为0，纵向距离为0
@@ -99,6 +147,11 @@ public class AvoidCongest {
                 next = src_path.get(i1+1);
             else
                 next = new int[]{2*current[0]-before[0],2*current[1]-before[1]};
+
+            if(!aroundReachable(current[0],current[1],map)){
+                System.err.println(String.format("路径上的 (%d,%d) 位置周围存在障碍,无法生成安全路径",current[0],current[1]));
+                return null;
+            }
 
 
             // 错误的方向，指该位置接下来移动的方向，上一个移动方向的反方向，或原地不动
@@ -192,8 +245,8 @@ public class AvoidCongest {
                     // 获取当前小车在另一个小车的路径上的索引位置
                     int cur_path_index = isInPath(cur_start_y, cur_start_x, other_path);
 
-                    boolean other_way_status = true;//iSInSingleWay(other_start_y, other_end_x, map);
-                    boolean cur_way_status =  true;//iSInSingleWay(cur_start_y, cur_end_x, map);
+                    boolean other_way_status = iSInSingleWay(other_path,map);
+                    boolean cur_way_status =  iSInSingleWay(cur_path,map);
 
                     // 同时在窄道，且两车都在对方的路径上
                     if (other_path_index != -1 && cur_way_status && cur_path_index != -1 && other_way_status) {
@@ -201,7 +254,7 @@ public class AvoidCongest {
                         List<int[]> cur_safe_path = findSafePlace(other_path, cur_path_index, map, cur_good);
                         List<int[]> other_safe_path = findSafePlace(cur_path, other_path_index, map, other_good);
                         if(cur_safe_path==null&&other_safe_path==null){
-                            //System.err.println("出现未考虑的情况");
+                            System.err.println("双方都无法计算安全路径");
                         }else if(cur_safe_path!=null&&other_safe_path==null){
                             updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,left_pos_and_robot);
 
@@ -209,14 +262,10 @@ public class AvoidCongest {
                             updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,left_pos_and_robot);
                         }
                         else if (cur_safe_path.size() < other_safe_path.size()) {
-//                            Tool.showPath(map, cur_path);
                             updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,left_pos_and_robot);
-//                            Tool.showPath(map,cur_safe_path);
                         }
                         else {
-//                            Tool.showPath(map,other_path);
                             updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,left_pos_and_robot);
-//                            Tool.showPath(map,other_path);
                         }
                     }
                 }
