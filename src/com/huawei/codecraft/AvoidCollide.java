@@ -159,10 +159,11 @@ public class AvoidCollide {
                 double angle = Tool.calAngle(rob_x, rob_y, rob2_x, rob2_y);
                 double distance = cal_2_Robots_Distance(robot, robot2);
                 if (Math.abs(intendAngle - angle) < 1) {
-                        if(distance < 4 && Main.who.get() == 1) robot.setWantForward(2);
-                        if(distance < 3.2 && Main.who.get() == 2) robot.setWantForward(3);
-                        if(distance < 4 && Main.who.get() == 3) robot.setWantForward(1);
-                        if(distance < 4 && Main.who.get() == 4) robot.setWantForward(2);
+//                        if(distance < 4 && Main.who.get() == 1) robot.setWantForward(2);
+//                        if(distance < 3.2 && Main.who.get() == 2) robot.setWantForward(3);
+//                        if(distance < 4 && Main.who.get() == 3) robot.setWantForward(1);
+//                        if(distance < 4 && Main.who.get() == 4) robot.setWantForward(2);
+                    if(distance < 2) robot.setWantForward(2);
                 }
             }
         }
