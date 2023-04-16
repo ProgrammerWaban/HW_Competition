@@ -274,4 +274,87 @@ public class Robot {
             }
         }
     }
+
+    //根据激光雷达来更新地图（只取机器人朝向的扇形区域（40度））
+    public void radarCheck(int[][] map_clone, int[][] map, ArrayList<Robot> robots) {
+
+        for (int i = 0; i < 170; i = i + 4) {
+            double angle_willAdd = Math.toRadians(i);
+            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle + angle_willAdd, radar[i]);
+            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle - angle_willAdd, radar[360 - 1 - i]);
+        }
+
+    }
+
+    //用于判断在一条线上是否有障碍物，进而来更新地图
+    private void singleLineOfRadarIsRobot(int[][] map_clone, int[][] map, ArrayList<Robot> robots, double theta, double distance) {
+        double x_add = x + (distance + 0.1) * Math.cos(theta);
+        double y_add = y + (distance + 0.1) * Math.sin(theta);
+        int mapIndex0 = (int) (y_add / 0.5);
+        int mapIndex1 = (int) (x_add / 0.5);
+        if (mapIndex0 < 1 || mapIndex0 > 98 || mapIndex1 < 1 || mapIndex1 > 98) return;
+        if (isBarrierAround(mapIndex0, mapIndex1, map)) {
+            //return false; // 表示雷达遍历到的是原生障碍物墙,不做处理
+        } else {
+            if (!isTeammate(robots, mapIndex0, mapIndex1)) {
+                map_clone[mapIndex0][mapIndex1] = -1;
+                //System.err.println("前方有机器人，更改地图");
+                //return true;   //表示遍历到的是机器人（对面方的）
+            }
+            //return false; //对于友方机器人不做处理，直接忽略
+        }
+    }
+
+    //用于判断雷达路径上的不是本方机器人
+    private boolean isTeammate(ArrayList<Robot> robots, int mapIndex0, int mapIndex1) {
+        int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        for (int i = 0; i < direction.length; i++) {
+            for (Robot robot : robots) {
+                if (robot.getX() == x && robot.getY() == y) {
+                    continue;
+                }
+
+                int tmp_x = robot.getMatXY()[0] + direction[i][0];
+                int tmp_y = robot.getMatXY()[1] + direction[i][1];
+                if (tmp_x < 0 || tmp_y < 0 || tmp_x > 99 || tmp_y > 99) continue;
+                if (mapIndex0 == tmp_x && mapIndex1 == tmp_y) {
+                    return true;  //表示想更新障碍物的地方周围存在友军
+                }
+            }
+        }
+        return false; //没有友军存在
+
+        //这套逻辑看来行不通（当机器人贴的很近的时候）
+//        for (Robot robot : robots) {
+//            //排除掉自己
+//            if (robot.getX() == x && robot.getY() == y) {
+//                continue;
+//            }
+//
+//            double angle = Tool.calAngle(x, y, robot.getX(), robot.getY());
+//            theta = theta < 0 ? theta + 2 * Math.PI : theta;
+//            //机器人得在雷达所遍历的那个5度角上
+//            if (Math.abs(angle - theta) < 1) {
+//                double robotDistance = Tool.calDistanceByXY(x, y, robot.getX(), robot.getY());
+//                if (robotDistance < distance + 1 && robotDistance > distance - 1) {
+//                    //则表示雷达弹照到的是本方机器人
+//                    return true;
+//                }
+//            }
+//        }
+//        //所有机器人都不符合条件则表示弹照到的是对面机器人
+//        return false;
+    }
+
+    //判断一个点周围的点是否存在障碍物（缩小这个雷达计算误差）
+    private boolean isBarrierAround(int nowY, int nowX, int[][] map) {
+        int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        for (int i = 0; i < direction.length; i++) {
+            int tmp_x = nowY + direction[i][0];
+            int tmp_y = nowX + direction[i][1];
+            if (tmp_y == getMatXY()[1] && tmp_x == getMatXY()[0]) continue;  //如果遍历到了自己当然直接pass
+            if (map[tmp_x][tmp_y] == -1) return true;
+        }
+        return false;
+    }
 }
