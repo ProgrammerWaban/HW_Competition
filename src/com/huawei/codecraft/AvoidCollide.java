@@ -163,7 +163,10 @@ public class AvoidCollide {
 //                        if(distance < 3.2 && Main.who.get() == 2) robot.setWantForward(3);
 //                        if(distance < 4 && Main.who.get() == 3) robot.setWantForward(1);
 //                        if(distance < 4 && Main.who.get() == 4) robot.setWantForward(2);
-                    if(distance < 2) robot.setWantForward(2);
+//                    if(distance < 5) robot.setWantForward(5);
+//                    if(distance < 4) robot.setWantForward(4);
+//                    if(distance < 3) robot.setWantForward(3);
+                    if(distance < 3) robot.setWantForward(2);
                 }
             }
         }
