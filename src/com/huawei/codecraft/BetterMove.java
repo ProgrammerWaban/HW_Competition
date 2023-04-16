@@ -1,5 +1,6 @@
 package com.huawei.codecraft;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,8 +81,13 @@ public class BetterMove {
                         robot.setWantForward(1);
                     }
                 } else {
-                    robot.setWantForward(1.5);
-                    robot.setWantRotate(Math.PI);
+                    if (v < 2) {
+                        robot.setWantForward(1.5);
+                        robot.setWantRotate(Math.PI);
+                    } else {
+                        robot.setWantForward(3);
+                        robot.setWantRotate(Math.PI);
+                    }
                 }
             }
         } else {
@@ -97,12 +103,12 @@ public class BetterMove {
             robot.setWantRotate(robot.getWantRotate() * (-1));
         } //如果大于零就什么都不做
 
-        //这里加一个靠近墙壁减速的活儿，防止碰撞损失
-        if (robot.getWantForward() >= 0) {
-            if (closeToWall(robot, 1.8)) {
-                robot.setWantForward(1);
-            }
-        }
+//        //这里加一个靠近墙壁减速的活儿，防止碰撞损失
+//        if (robot.getWantForward() >= 0) {
+//            if (closeToWall(robot, 1.8)) {
+//                robot.setWantForward(1);
+//            }
+//        }
 
     }
 
@@ -172,8 +178,13 @@ public class BetterMove {
                     double a = distance * Math.PI / 2 / Math.sin(theta);
                     robot.setWantForward(a);
                 } else {
-                    robot.setWantForward(2);
-                    robot.setWantRotate(Math.PI);
+                    if (v < 2) {
+                        robot.setWantForward(1.5);
+                        robot.setWantRotate(Math.PI);
+                    } else {
+                        robot.setWantForward(3);
+                        robot.setWantRotate(Math.PI);
+                    }
                 }
             }
         } else {
@@ -192,15 +203,16 @@ public class BetterMove {
         } //如果大于零就什么都不做
 
         //这里加一个靠近墙壁减速的活儿，防止碰撞损失
-        if(robot.getWantForward()>=0) {
-            if (closeToWall(robot, 1.8)) {
-                robot.setWantForward(1);
-            }
-        }
+        //加到外面去了
+//        if (robot.getWantForward() >= 0) {
+//            if (closeToWall(robot, 1.8)) {
+//                robot.setWantForward(1);
+//            }
+//        }
 
     }
 
-    public static void nextPointToGo(int[][] map, List<int[]> path, Robot robot, Workbench wb){
+    public static void nextPointToGo(int[][] map, List<int[]> path, Robot robot, Workbench wb) {
         if (path.size() > 2) {
             int[] ints = path.get(2);
 //                        int dx = path.get(path.size() - 3)[0] - path.get(path.size() - 2)[0];
@@ -253,6 +265,7 @@ public class BetterMove {
                 wb.setX(ints[1] * 0.5 + 0.25);
             }
         } else {
+
             int[] ints = path.get(path.size() - 1);
             wb.setY(ints[0] * 0.5 + 0.25);
             wb.setX(ints[1] * 0.5 + 0.25);
@@ -260,42 +273,84 @@ public class BetterMove {
     }
 
 
-    //与墙的碰撞避免
-    public static boolean closeToWall(Robot robot, double distance_avoid) {
-        //地图为50m*50m
-        //机器人最大半径为0.53~0.45
-        double x = robot.getX();
-        double y = robot.getY();
-        double angleThread = 1;
-//        double bevel_len = distance_avoid / Math.sin(Math.PI / 4);
-//        double max_len = 50 / Math.sin(Math.PI / 4);
-//        double bevel_xy = Math.sqrt(x * x + y * y);
-
-        double intendAngle = robot.getIntendAngle() > 0 ? robot.getIntendAngle() : robot.getIntendAngle() + 2 * Math.PI;
-        if (y < distance_avoid && Math.abs(intendAngle - 3 * Math.PI / 2) < angleThread) {
-            return true;
-        } else if (y > 50 - distance_avoid && Math.abs(intendAngle - Math.PI / 2) < angleThread) {
-            return true;
-        } else if (x < distance_avoid && Math.abs(intendAngle - Math.PI) < angleThread) {
-            return true;
-        } else if (x > 50 - distance_avoid && (intendAngle < angleThread || intendAngle > 2 * Math.PI - angleThread)) {
-            return true;
-        } else if (y < distance_avoid && x < distance_avoid && Math.abs(intendAngle - 5 * Math.PI / 4) < angleThread) {
-            //从这里就开始判断斜边,左下
-            return true;
-        } else if (y < distance_avoid && x > 50 - distance_avoid && Math.abs(intendAngle - 7 * Math.PI / 4) < angleThread) {
-            //右下
-
-            return true;
-        } else if (y > 50 - distance_avoid && x < distance_avoid && Math.abs(intendAngle - 3 * Math.PI / 4) < angleThread) {
-            //左上
-            return true;
-        } else if (y > 50 - distance_avoid && x > 50 - distance_avoid && Math.abs(intendAngle - Math.PI / 4) < angleThread) {
-            //右上
-            return true;
+    public static void closeToWall_slowDown(int[][] map_clone, Robot robot, double distance_avoid) {
+        //根据激光雷达来判断障碍物（只取机器人朝向的扇形区域（ 2*i 度））
+        for (int i = 0; i < 20; i++) {
+            if (robot.getRadar()[i] < distance_avoid || robot.getRadar()[360 - 1 - i] < distance_avoid) {
+                robot.setWantForward(2);
+                return;
+            }
         }
-        return false;
     }
+
+//    public static void closeToRobot_avoid(int[][] map_clone, int[][] map, Robot robot){
+//        for (int i = 0; i < 30; i++) {
+//            double angle_willAdd = Math.toRadians(i);
+//            singleLineOfRadarIsEnemyRobot(map_clone, map, robot, i);
+//            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle - angle_willAdd, radar[360 - 1 - i]);
+//        }
+//    }
+//
+//    //用于判断在一条线上是否有障碍物，进而来更新地图
+//    private static void singleLineOfRadarIsEnemyRobot(int[][] map_clone, int[][] map, Robot robot, int angleIndex) {
+//        double angle_willAdd = Math.toRadians(angleIndex);
+//        robot.getX()+ (robot.getRadar()[angleIndex] + 0.6) * Math.cos(robot.getIntendAngle()+angle_willAdd)
+//
+//
+//        double x_add = x + (distance + 0.6) * Math.cos(theta);
+//        double y_add = y + (distance + 0.6) * Math.sin(theta);
+//        int mapIndex0 = (int) (y_add / 0.5);
+//        int mapIndex1 = (int) (x_add / 0.5);
+//        if (mapIndex0 < 1 || mapIndex0 > 98 || mapIndex1 < 1 || mapIndex1 > 98) return;
+//        if (isBarrierAround(mapIndex0, mapIndex1, map)) {
+//            //return false; // 表示雷达遍历到的是原生障碍物墙,不做处理
+//        } else {
+//            if (!isTeammate(robots, distance)) {
+//                map_clone[mapIndex0][mapIndex1] = -1;
+//                System.err.println("前方有机器人，更改地图");
+//                //return true;   //表示遍历到的是机器人（对面方的）
+//            }
+//            //return false; //对于友方机器人不做处理，直接忽略
+//        }
+//    }
+
+
+    //与墙的碰撞避免============这个版本已经不适用了（得用雷达最好）
+//    public static boolean closeToWall(Robot robot, double distance_avoid) {
+//        //地图为50m*50m
+//        //机器人最大半径为0.53~0.45
+//        double x = robot.getX();
+//        double y = robot.getY();
+//        double angleThread = 1;
+////        double bevel_len = distance_avoid / Math.sin(Math.PI / 4);
+////        double max_len = 50 / Math.sin(Math.PI / 4);
+////        double bevel_xy = Math.sqrt(x * x + y * y);
+//
+//        double intendAngle = robot.getIntendAngle() > 0 ? robot.getIntendAngle() : robot.getIntendAngle() + 2 * Math.PI;
+//        if (y < distance_avoid && Math.abs(intendAngle - 3 * Math.PI / 2) < angleThread) {
+//            return true;
+//        } else if (y > 50 - distance_avoid && Math.abs(intendAngle - Math.PI / 2) < angleThread) {
+//            return true;
+//        } else if (x < distance_avoid && Math.abs(intendAngle - Math.PI) < angleThread) {
+//            return true;
+//        } else if (x > 50 - distance_avoid && (intendAngle < angleThread || intendAngle > 2 * Math.PI - angleThread)) {
+//            return true;
+//        } else if (y < distance_avoid && x < distance_avoid && Math.abs(intendAngle - 5 * Math.PI / 4) < angleThread) {
+//            //从这里就开始判断斜边,左下
+//            return true;
+//        } else if (y < distance_avoid && x > 50 - distance_avoid && Math.abs(intendAngle - 7 * Math.PI / 4) < angleThread) {
+//            //右下
+//
+//            return true;
+//        } else if (y > 50 - distance_avoid && x < distance_avoid && Math.abs(intendAngle - 3 * Math.PI / 4) < angleThread) {
+//            //左上
+//            return true;
+//        } else if (y > 50 - distance_avoid && x > 50 - distance_avoid && Math.abs(intendAngle - Math.PI / 4) < angleThread) {
+//            //右上
+//            return true;
+//        }
+//        return false;
+//    }
 
     //二分查找可直线行驶的路径
     public static int binarySearchDestination(int[][] map, List<int[]> path, Robot robot, Workbench wb) {
