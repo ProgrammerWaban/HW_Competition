@@ -1,10 +1,7 @@
 package com.huawei.codecraft;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 
@@ -31,6 +28,11 @@ public class Main {
             {{-1,-1},{-1,-1},{-1,-1},{-1,-1}},
             {{-1,-1},{-1,-1},{-1,-1},{-1,-1}},
     };
+
+    //永远弄死的工作台
+    private static ArrayList<Workbench> dead_Workbench = new ArrayList<>();
+    //记录一个工作台死了多少秒
+    private static Map<Workbench, Integer> dead_time_wb = new HashMap<>();
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -114,11 +116,75 @@ public class Main {
                 if (robot.isBuy())  builder.append("buy").append(' ').append(robotId).append('\n');
             }
 
+            //进行地图深克隆
+            int[][] map_clone = new int[map.length][];
+            for (int i = 0; i < map.length; i++) {
+                map_clone[i] = map[i].clone();
+            }
+            //改变map_clone
+            if (team.equals("RED")) {
+                for (Robot robot : robots) {
+                    robot.radarCheck(map_clone, map, robots);
+                }
+            }
+
+            //初始化下工作台状态
+            ArrayList<Workbench> standOnWorkbench = null;
+            if (team.equals("RED")) {
+                standOnWorkbench = Tool.isStandOnWorkbench(map_clone, map, workbenches);
+            }
+
+            //如果一个工作台在50帧内被弄死了50次，就把这个工作台永远置为死
+            if (team.equals("RED")) {
+                for (Workbench workbench : workbenches) {
+                    if (!workbench.isEnemyNotOn) {
+                        Integer deadTime = dead_time_wb.getOrDefault(workbench, 0);
+                        if (deadTime > 80 && !dead_Workbench.contains(workbench)) {
+                            workbench.setAlive(false);
+                            dead_Workbench.add(workbench);
+                        } else if (deadTime <= 80) {
+                            dead_time_wb.put(workbench, deadTime + 1);
+                        }
+                    } else {
+                        if (dead_time_wb.keySet().contains(workbench)) {
+                            dead_time_wb.remove(workbench);
+                        }
+                    }
+                }
+            }
+
             //调度中心
             dc.dispatching(robots, workbenches);
 
+            //要将刚才弄死的工作台还原一下
+            if (team.equals("RED")) {
+                for (Workbench onWorkbench : standOnWorkbench) {
+                    onWorkbench.isEnemyNotOn = true;
+                    //onWorkbench.setAlive(true);
+
+                }
+            }
+
             //计算 机器人的路线
             for (int robotId = 0; robotId < 4; robotId++) {
+
+                //测试用例
+                if (team.equals("BLUE") && robotId == 0) {
+                    Robot robot = robots.get(robotId);
+                    Workbench wb = new Workbench();
+                    wb.setyMap(30);
+                    wb.setxMap(29);
+                    int[] startXY = robot.getMatXY();
+                    int[] stopXY = new int[]{wb.getxMap(), wb.getyMap()};
+                    double[][] distMat = robot.getGoodID() == 0 ? wb.getDistMatWithNoGood() : wb.getDistMatWithGood();
+                    int hasGood = robot.getGoodID() == 0 ? 0 : 1;
+                    List<int[]> path;
+                    path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+                    Collections.reverse(path);
+                    robotsPath.add(path);
+                    continue;
+                }
+
                 Robot robot = robots.get(robotId);
                 int destinationID = dc.findDestinationIDByRobotID(robotId);
                 Workbench wb = destinationID == -1 ? null : workbenches.get(destinationID);
@@ -135,40 +201,24 @@ public class Main {
                     int hasGood = robot.getGoodID() == 0 ? 0 : 1;
                     List<int[]> path;
                     if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
-                        path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
+                        path = SearchAlgorithm.astar(startXY, stopXY, map_clone, distMat, hasGood);
                     else
-                        path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                        path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
                     Collections.reverse(path);
                     robotsPath.add(path);
                 }
+            }
+
+            //打印输出地图和路径
+            boolean f = false;
+            if (f) {
+                Tool.printMap(map_clone, robotsPath);
             }
 
             // 在合适的位置，释放安全位置的小车
             AvoidCongest.free_robot(robotsPath,SafePlace,leave_pos_and_robot);
             // 防堵车
             AvoidCongest.avoid_Congest(robotsPath,map,SafePlace,leave_pos_and_robot,robots);
-
-            //  打印输出路径
-//            int[][] look = new int[map.length][map[0].length];
-//            for(int i = 0; i < map.length; i++){
-//                for(int j = 0; j < map[0].length; j++){
-//                    look[i][j] = map[i][j];
-//                }
-//            }
-//            for(List<int[]> p : robotsPath){
-//                for(int[] pp : p){
-//                    look[pp[0]][pp[1]] = -3;
-//                }
-//            }
-//            for(int i = map.length - 1; i >= 0; i--){
-//                for(int j = 0; j < map[0].length; j++){
-//                    if(look[i][j] == -3)    System.err.print('+');
-//                    if(look[i][j] == -2)    System.err.print(' ');
-//                    if(look[i][j] == -1)    System.err.print('#');
-//                    if(look[i][j] >= 0)    System.err.print(' ');
-//                }
-//                System.err.print("\n");
-//            }
 
             //计算移动和旋转
             for (int robotId = 0; robotId < 4; robotId++) {
@@ -177,7 +227,12 @@ public class Main {
                 Workbench wb = new Workbench();
                 if(destinationID > -1){
                     List<int[]> path = robotsPath.get(robotId);
-                    if(path.size() == 0)    continue;
+                    if (path.size() == 0 || path.size() == 1) {
+                        //防止原地抽搐
+                        wb = workbenches.get(destinationID);
+                        BetterMove.adjustMovement(wb, robot);
+                        continue;
+                    }
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
                     if(jump == 0){
                         BetterMove.adjustMovement(wb, robot);
@@ -185,6 +240,8 @@ public class Main {
                         BetterMove.adjustMovementJump(wb, robot);
                     }
                 }
+                //靠经墙壁减速(其实这里也可以设置成只有红方才执行)
+                BetterMove.closeToWall_slowDown(map_clone, robot, 1.8);
                 //计算到目的地所需要的Forward和Rotate
                 //robot.calForwardAndRotate(wb);
                 //BetterMove.adjustMovement(wb, robot);
