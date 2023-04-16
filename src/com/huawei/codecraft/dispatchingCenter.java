@@ -116,7 +116,7 @@ public class dispatchingCenter {
                 robotsToSell.add(robotId);
             }
         }
-        //findRoadToSell(robotsToSell, robots, workbenches);
+        findRoadToSell(robotsToSell, robots, workbenches);
         findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
     }
 
@@ -392,20 +392,38 @@ public class dispatchingCenter {
                         double robotToSellDistance = robotToBuyDistance + buyToSellDistance;
                         //判断剩余时间是否能完成买卖
                         if(!isEnoughTimeToBuySell(robotToSellDistance, 6, remainFrame))    continue;
+                        robotToSellDistance += 50;
                         //求价值
                         double goodValue = valueArray[wb.getID()];
                         double futureValue = valueArray[wb1.getID()];
                         int n = Tool.changeRawToList(wb1.getRaw()).size();
                         int nn = wb1.getNeeds().size() - n;
                         futureValue /= nn;
+                        if(wb1.getID() == 7)    futureValue *= 2;
+                        if(wb1.getProduct_status() == 1 || wb1.getRemain_frame() > -1){
+                            if(wb1.getID() != 7)    futureValue /= 6;
+                            else    futureValue /= 2;
+                        }
+                        if(wb.getID() == 7) futureValue += valueArray[7];
                         double totalValue = goodValue + futureValue;
                         //如果7缺一个原材料就提高对应的权值
                         if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
                             List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
                             for(Integer l1 : list1){
                                 Workbench wb2 = workbenches.get(l1);
-                                if(!Tool.changeRawToList(wb2.getRaw()).contains(wb1.getID()) && wb2.getNeeds().size() - Tool.changeRawToList(wb2.getRaw()).size() == 1){
-                                    totalValue += valueArray[wb2.getID()];
+                                //获取机器人手上的物品+工作台的原材料
+                                HashSet<Integer> robotsGoods = new HashSet<>();
+                                for(Robot r : Main.robots){
+                                    if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
+                                }
+                                for(Workbench w : workbenches){
+                                    if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
+                                        if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                    }
+                                }
+                                robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
+                                if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
+                                    totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()));
                                     break;
                                 }
                             }
@@ -443,20 +461,38 @@ public class dispatchingCenter {
                             double robotToSellDistance = robotToBuyDistance + buyToSellDistance;
                             //判断剩余时间是否能完成买卖
                             if(!isEnoughTimeToBuySell(robotToSellDistance, 6, remainFrame))    continue;
+                            robotToSellDistance += 50;
                             //求价值
                             double goodValue = valueArray[wb.getID()];
                             double futureValue = valueArray[wb1.getID()];
                             int n = Tool.changeRawToList(wb1.getRaw()).size();
                             int nn = wb1.getNeeds().size() - n;
                             futureValue /= nn;
+                            if(wb1.getID() == 7)    futureValue *= 2;
+                            if(wb1.getProduct_status() == 1 || wb1.getRemain_frame() > -1){
+                                if(wb1.getID() != 7)    futureValue /= 6;
+                                else    futureValue /= 2;
+                            }
+                            if(wb.getID() == 7) futureValue += valueArray[7];
                             double totalValue = goodValue + futureValue;
                             //如果7缺一个原材料就提高对应的权值
                             if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
                                 List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
                                 for(Integer l1 : list1){
                                     Workbench wb2 = workbenches.get(l1);
-                                    if(!Tool.changeRawToList(wb2.getRaw()).contains(wb1.getID()) && wb2.getNeeds().size() - Tool.changeRawToList(wb2.getRaw()).size() == 1){
-                                        totalValue += valueArray[wb2.getID()];
+                                    //获取机器人手上的物品+工作台的原材料
+                                    HashSet<Integer> robotsGoods = new HashSet<>();
+                                    for(Robot r : Main.robots){
+                                        if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
+                                    }
+                                    for(Workbench w : workbenches){
+                                        if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
+                                            if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                        }
+                                    }
+                                    robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
+                                    if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
+                                        totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()));
                                         break;
                                     }
                                 }
@@ -558,20 +594,38 @@ public class dispatchingCenter {
                 if(distance == Double.MAX_VALUE)    continue;
                 //判断剩余时间是否能完成卖
                 if(!isEnoughTimeToBuySell(distance, 6, remainFrame))    continue;
+                distance += 50;
                 //求价值
                 double goodValue = valueArray[goodID];
                 double futureValue = valueArray[wb.getID()];
                 int n = Tool.changeRawToList(wb.getRaw()).size();
                 int nn = wb.getNeeds().size() - n;
                 futureValue /= nn;
+                if(wb.getID() == 7)    futureValue *= 2;
+                if(wb.getProduct_status() == 1 || wb.getRemain_frame() > -1){
+                    if(wb.getID() != 7) futureValue /= 6;
+                    else futureValue /= 2;
+                }
+                if(goodID == 7) futureValue += valueArray[7];
                 double totalValue = goodValue + futureValue;
                 //如果7缺一个原材料就提高对应的权值
                 if(goodID == 1 || goodID == 2 || goodID == 3){
                     List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb.getID()), getWBXListByGoodID(wb.getID()));
                     for(Integer l1 : list1){
                         Workbench wb2 = workbenches.get(l1);
-                        if(!Tool.changeRawToList(wb2.getRaw()).contains(wb.getID()) && wb2.getNeeds().size() - Tool.changeRawToList(wb2.getRaw()).size() == 1){
-                            totalValue += valueArray[wb2.getID()];
+                        //获取机器人手上的物品+工作台的原材料
+                        HashSet<Integer> robotsGoods = new HashSet<>();
+                        for(Robot r : Main.robots){
+                            if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
+                        }
+                        for(Workbench w : workbenches){
+                            if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
+                                if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                            }
+                        }
+                        robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
+                        if(!robotsGoods.contains(wb.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
+                            totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()));
                             break;
                         }
                     }
@@ -624,8 +678,9 @@ public class dispatchingCenter {
 
     //根据距离计算时间，与剩余时间比较，是否足够去买卖
     public boolean isEnoughTimeToBuySell(double distance, double speed, int remainFrame){
+        if("BLUE".equals(Main.team))    speed = 7;
         double time = distance / speed;
-        time += 3;
+        time *= 1.15;
         return time * 50 < remainFrame;
     }
 
