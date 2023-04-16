@@ -391,7 +391,7 @@ public class dispatchingCenter {
                         if(buyToSellDistance == Double.MAX_VALUE)  continue;
                         double robotToSellDistance = robotToBuyDistance + buyToSellDistance;
                         //判断剩余时间是否能完成买卖
-                        if(!isEnoughTimeToBuySell(robotToSellDistance, 6, remainFrame))    continue;
+                        if(!isEnoughTimeToBuySell(robotToSellDistance, 6, remainFrame, 0))    continue;
                         robotToSellDistance += 50;
                         //求价值
                         double goodValue = valueArray[wb.getID()];
@@ -460,7 +460,7 @@ public class dispatchingCenter {
                             if(buyToSellDistance == Double.MAX_VALUE)  continue;
                             double robotToSellDistance = robotToBuyDistance + buyToSellDistance;
                             //判断剩余时间是否能完成买卖
-                            if(!isEnoughTimeToBuySell(robotToSellDistance, 6, remainFrame))    continue;
+                            if(!isEnoughTimeToBuySell(robotToSellDistance, 6, remainFrame, 0))    continue;
                             robotToSellDistance += 50;
                             //求价值
                             double goodValue = valueArray[wb.getID()];
@@ -593,7 +593,7 @@ public class dispatchingCenter {
                 double distance = wb.getDistMatWithGood()[robotMatXY[0]][robotMatXY[1]];
                 if(distance == Double.MAX_VALUE)    continue;
                 //判断剩余时间是否能完成卖
-                if(!isEnoughTimeToBuySell(distance, 6, remainFrame))    continue;
+                if(!isEnoughTimeToBuySell(distance, 6, remainFrame, 1))    continue;
                 distance += 50;
                 //求价值
                 double goodValue = valueArray[goodID];
@@ -677,10 +677,11 @@ public class dispatchingCenter {
     }
 
     //根据距离计算时间，与剩余时间比较，是否足够去买卖
-    public boolean isEnoughTimeToBuySell(double distance, double speed, int remainFrame){
-        if("BLUE".equals(Main.team))    speed = 7;
+    public boolean isEnoughTimeToBuySell(double distance, double speed, int remainFrame, int buyOrSell){
+        if("RED".equals(Main.team))    speed = 7;
+        double multiple = buyOrSell == 0 ? 1.2 : 1.1;
         double time = distance / speed;
-        time *= 1.15;
+        time *= multiple;
         return time * 50 < remainFrame;
     }
 
