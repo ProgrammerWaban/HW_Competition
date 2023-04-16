@@ -1,9 +1,21 @@
 package com.huawei.codecraft;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
+
+
+
+class Result{
+    public List<int[]> path;
+    public int leave_index;
+
+    public Result(){
+        this.path = null;
+        leave_index = -2;
+    }
+
+}
 
 public class AvoidCongest {
 
@@ -14,25 +26,22 @@ public class AvoidCongest {
         int count1 = 0;
         int [][]directions = new int[][]{{-1,1},{-1,-1},{1,-1},{1,1}};
         // 记录对角线方向的空的位置数
-        for(int i=0;i<directions.length;i++){
-            int tmp_y = y+directions[i][0];
-            int tmp_x = x+directions[i][1];
-            int tmp_y_1 = y*2+directions[i][0];
-            int tmp_x_1 = x*2+directions[i][1];
-            if(tmp_y<map.length&&tmp_y>=0&&tmp_x<map.length&&tmp_x>=0&&map[tmp_y][tmp_x]!=-1){
+        for (int[] direction : directions) {
+            int tmp_y = y + direction[0];
+            int tmp_x = x + direction[1];
+            int tmp_y_1 = y * 2 + direction[0];
+            int tmp_x_1 = x * 2 + direction[1];
+            if (tmp_y < map.length && tmp_y >= 0 && tmp_x < map.length && tmp_x >= 0 && map[tmp_y][tmp_x] != -1) {
                 count++;
             }
 
-            if(tmp_y_1<map.length&&tmp_y_1>=0&&tmp_x_1<map.length&&tmp_x_1>=0&&map[tmp_y_1][tmp_x_1]!=-1){
+            if (tmp_y_1 < map.length && tmp_y_1 >= 0 && tmp_x_1 < map.length && tmp_x_1 >= 0 && map[tmp_y_1][tmp_x_1] != -1) {
                 count1++;
             }
         }
         if(count<4)
             return true;
-        else if(count1<3)
-            return true;
-
-        return false;
+        else return count1 < 3;
 
     }
 
@@ -47,6 +56,22 @@ public class AvoidCongest {
         }
         return false;
     }
+
+//    public static boolean isAffectOtherSafePlace(int target_y,int target_x,int robotId,int [][] safePlace){
+//        for(int i=0;i<safePlace.length;i++){
+//            if(i==robotId||(safePlace[i][0]==-1&&safePlace[i][1]==-1))
+//                continue;
+//            int other_y = safePlace[i][0];
+//            int other_x = safePlace[i][1];
+//            int dy = other_y - target_y;
+//            int dx = other_x - target_x;
+//            if(dy*dy+dx*dx < 16)
+//                return true;
+//
+//        }
+//        return false;
+//    }
+
 
 
     public static boolean iSInSingleWay(List<int[]> path,int [][]map) {
@@ -72,7 +97,7 @@ public class AvoidCongest {
                 vertical_direction_1 = new int []{move_direction[0],-move_direction[1]};
                 vertical_direction_2 = new int [] {-move_direction[0],move_direction[1]};
             }
-            if(isLineBarrier(y,x,vertical_direction_1,2,map)||isLineBarrier(y,x,vertical_direction_2,2,map)){
+            if(isLineBarrier(next_y,next_x,vertical_direction_1,2,map)||isLineBarrier(next_y,next_x,vertical_direction_2,2,map)){
                 return true;
             }
 
@@ -93,8 +118,8 @@ public class AvoidCongest {
     // 存在则返回距离最近的索引，否则返回-1，表示该位置不在路径上。
     public static int isInPath(int y,int x,List<int[]> path){
         int length =path.size();
-        length = length>12?12:length;
-        int start = -1;
+        length = Math.min(length, 12);
+        int start;
         int tmp1 = -1,tmp2 = -1;
         for(int i=0;i<length;i++){
             int []current = path.get(i);
@@ -116,118 +141,151 @@ public class AvoidCongest {
     }
 
     // 在路径上寻找可以达到安全位置的路径，start指在路径上的开始寻找的位置的索引，start索引对应的位置为当前小车的位置
-    public static List<int []> findSafePlace(List<int []>src_path, int start,int [][]map, int has_good){
-        int path_length = src_path.size();
+    public static Result findSafePlace(List<int []>src_path, int start, int end, int [][]map, int has_good, int robotId,int [][] safePlace){
+        Result result = new Result();
         List<int[]> safe_path;
         if(start==-1){
-            //System.err.println("索引位置不在路径上");
-            return null;
+//            System.err.println("无法生成安全路径，索引位置不在路径上");
+            return result;
         }
 
-        int i1 = start;
-        if(path_length<2){
-            //System.err.println("路径长度为1，无法判断将要去的方向");
-            return null;
+        int cur_index = start;
+        if(end <2){
+//            System.err.println("无法生成安全路径，路径长度为1，无法判断将要去的方向");
+            return result;
         }
 
-        while(i1<path_length){
+        while(cur_index< end){
             // 分别表示当前位置，下一个位置和上一个位置
-            int []current = src_path.get(i1);
+            int []current = src_path.get(cur_index);
             int []next;
             int []before;
             // 在第一个位置，不知到上一个位置，则用下一个位置预估上一个位置
-            if(i1-1>=0)
-                before = src_path.get(i1-1);
+            if(cur_index-1>=0)
+                before = src_path.get(cur_index-1);
             else {
-                next = src_path.get(i1+1);
+                next = src_path.get(cur_index+1);
                 before = new int[]{2 * current[0] - next[0], 2 * current[1] - next[1]};
             }
             // 在第最后一个位置，不知到下一个位置，则用上一个位置预估下一个位置
-            if(i1+1<path_length)
-                next = src_path.get(i1+1);
+            if(cur_index+1< end)
+                next = src_path.get(cur_index+1);
             else
                 next = new int[]{2*current[0]-before[0],2*current[1]-before[1]};
 
             if(!aroundReachable(current[0],current[1],map)){
-                System.err.println(String.format("路径上的 (%d,%d) 位置周围存在障碍,无法生成安全路径",current[0],current[1]));
-                return null;
+//                System.err.printf("无法生成安全路径，路径上的 (%d,%d) 位置周围存在障碍%n",current[0],current[1]);
+                return result;
             }
 
 
             // 错误的方向，指该位置接下来移动的方向，上一个移动方向的反方向，或原地不动
             int []last_direction = new int[]{before[0]-current[0],before[1]-current[1]};//注意这是上个方向的反方向
             int []next_direction = new int[]{next[0]-current[0],next[1]-current[1]};
-            List<int[]> wrong_direct;
-            wrong_direct = Arrays.asList(last_direction, next_direction, new int[]{0, 0});
-            List<int []> directions = new ArrayList<int []>();// 存储可能去的方向
-            int w_size = wrong_direct.size();
-            for(int i=-1;i<2;i++){
-                for(int j=-1;j<2;j++){
-                    int k = 0;
-                    for(;k< w_size;k++){
-                        int [] t_direction = wrong_direct.get(k);
-                        if(t_direction[0]==i&&t_direction[1]==j)
-                            break;
-                    }
-                    if(k==w_size)
-                        directions.add(new int[]{i,j});
-                }
-            }
+            int[][] directions = new int[][]{{1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
             // 遍历所有可行的方向，寻找可能的避免碰撞的长度为3的直线路径
             for(int[] direct : directions) {
-
+                if((direct[0]==last_direction[0]&&direct[1]==last_direction[1])||(direct[0]==next_direction[0]&&direct[1]==next_direction[1]))
+                    continue;
                 if (isReachable(current[0], current[1], direct, map)
-                        && isReachable(current[0] + direct[0], current[1] + direct[1], direct, map)
-                        && isReachable(current[0] + 2 * direct[0], current[1] + 2 * direct[1], direct, map)) {
+                        && isReachable(current[0] + direct[0], current[1] + direct[1], direct, map)) {
                     // 无商品直接添加路径，有商品需要多向前看一格
-                    if(has_good==-1 || isReachable(current[0] + 3 * direct[0], current[1] + 3 * direct[1], direct, map)) {
+                    int target_y,target_x;
+                    if(has_good==0){
+                        target_y = current[0]+2*direct[0];
+                        target_x = current[1]+2*direct[1];
+                    }else {
+                        target_y = current[0]+3*direct[0];
+                        target_x = current[1]+3*direct[1];
+                    }
+                    if(!isOverMinDis(src_path,cur_index,target_y,target_x))
+                        continue;
 
-                        List<int[]> temp_path = src_path.subList(start, i1 + 1);
-                        safe_path = new ArrayList<>();
-                        safe_path.addAll(temp_path);
+//                    if(!isAffectOtherSafePlace(target_y,target_x,robotId,safePlace))
+//                        continue;
+
+
+
+                    if(has_good==0 || isReachable(current[0] + 2 * direct[0], current[1] + 2 * direct[1], direct, map)) {
+
+                        List<int[]> temp_path = src_path.subList(start, cur_index + 1);
+                        safe_path = new ArrayList<>(temp_path);
                         // 下面三个位置，相当于新生成的路径
                         safe_path.add(new int[]{current[0] + direct[0], current[1] + direct[1]});
                         safe_path.add(new int[]{current[0] + direct[0] * 2, current[1] + direct[1] * 2});
-                        safe_path.add(new int[]{current[0] + direct[0] * 3, current[1] + direct[1] * 3});
-                        return safe_path;
+                        if(isReachable(current[0] + 2 * direct[0], current[1] + 2 * direct[1], direct, map)) {
+                            safe_path.add(new int[]{current[0] + direct[0] * 3, current[1] + direct[1] * 3});
+                            result.path = safe_path;
+                            result.leave_index = safe_path.size()-4;
+                            return result;
+                        }
+                        result.path = safe_path;
+                        result.leave_index = safe_path.size()-3;
+                        return result;
                     }
                 }
 
             }
             // 未找到，则去下一个位置寻找路径
-            i1++;
+            cur_index++;
         }
-        //System.err.println("未找到路径");
-        return null;
+//        System.err.println("已搜索完整条路径，未找到安全路径");
+        return result;
     }
 
+    public static boolean isOverMinDis(List<int []>src_path,int start,int target_y, int target_x){
+        int start_index = Math.max(0,start-2);
+        int end_index = Math.min(start+3,src_path.size());
+        for(int i=start_index;i<end_index;i++){
+            int [] tmp = src_path.get(i);
+            int dy = tmp[0] - target_y;
+            int dx = tmp[1] - target_x;
+            if((dy*dy+dx*dx)<4)
+                return false;
+        }
+        return true;
+    }
 
+    public static boolean isFarAwaySafePlace(int robotId, int target_y,int target_x,int [][] safePlace){
+        for(int i=0;i<safePlace.length;i++){
+            if(i==robotId)
+                continue;
+            int py = safePlace[i][0];
+            int px = safePlace[i][0];
+            if(py!=-1&&px!=-1){
+                int dy = target_y - py;
+                int dx = target_x - px;
+                if((dy*dy+dx*dx)<16)
+                    return false;
+            }
+        }
+        return true;
+    }
     // 判断位置是否可达，可达位置的相邻方块的8个方向都没有墙
-    public static boolean isReachable(int nowY,int nowX,int[] dircet,int [][]map){
-        int nextY = nowY+dircet[0];
-        int nextX = nowX+dircet[1];
+    public static boolean isReachable(int nowY,int nowX,int[] dircetion,int [][]map){
+        int nextY = nowY+dircetion[0];
+        int nextX = nowX+dircetion[1];
         if(nowY >= map.length || nowY < 0 || nowX < 0 || nowX >= map[0].length)  return false;
         if(nextY >= map.length || nextY < 0 || nextX < 0 || nextX >= map[0].length)  return false;
         if(map[nowY][nowX]==-1)  return false;
         if(map[nextY][nextX]==-1)  return false;
-        if(!aroundReachable(nowY,nowX,map)) return false;
-        return true;
+        return aroundReachable(nextY, nextX, map);
     }
 
     // 判读一个格子的8个相邻方向是否无墙且可达
     public static boolean aroundReachable(int nowY,int nowX,int[][]map){
-        int[][] direction = new int[][]{{1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
-        for(int i=0;i<direction.length;i++){
-            int tmp_Y = nowY+direction[i][0];
-            int tmp_X = nowX+direction[i][1];
-            if(tmp_Y >= map.length || tmp_Y < 0 || tmp_X < 0 || tmp_X >= map[0].length)  return false;
-            if(map[tmp_Y][tmp_X]==-1)  return false;
+        int[][] directions = new int[][]{{1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        for (int[] direction : directions) {
+            int tmp_Y = nowY + direction[0];
+            int tmp_X = nowX + direction[1];
+            if (tmp_Y >= map.length || tmp_Y < 0 || tmp_X < 0 || tmp_X >= map[0].length) return false;
+            if (map[tmp_Y][tmp_X] == -1) return false;
         }
         return true;
     }
 
     //
-    public static void avoid_Congest(List<List<int[]>> robotsPath,int [][]map, int[][] safePlace,ArrayList<int []> [] left_pos_and_robot,ArrayList<Robot> robots) {
+    public static void avoid_Congest(List<List<int[]>> robotsPath,int [][]map, int[][] safePlace,int[][][] leave_pos_and_robot,ArrayList<Robot> robots) {
         for (int robotId = 0; robotId < 3; robotId++) {
             int otherId = robotId+1;
             List<int[]> cur_path = robotsPath.get(robotId);
@@ -251,21 +309,45 @@ public class AvoidCongest {
                     // 同时在窄道，且两车都在对方的路径上
                     if (other_path_index != -1 && cur_way_status && cur_path_index != -1 && other_way_status) {
                         // 双方寻找安全位置的路径
-                        List<int[]> cur_safe_path = findSafePlace(other_path, cur_path_index, map, cur_good);
-                        List<int[]> other_safe_path = findSafePlace(cur_path, other_path_index, map, other_good);
-                        if(cur_safe_path==null&&other_safe_path==null){
-                            System.err.println("双方都无法计算安全路径");
-                        }else if(cur_safe_path!=null&&other_safe_path==null){
-                            updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,left_pos_and_robot);
+                        int cur_end = other_path.size();
+                        Result cur_result = findSafePlace(other_path, cur_path_index,cur_end, map,cur_good, robotId,safePlace);
+                        List<int[]> cur_safe_path = cur_result.path;
+                        int cur_leave_index = cur_result.leave_index;
 
+                        int other_end = cur_path.size();
+                        Result other_result = findSafePlace(cur_path, other_path_index,other_end, map,other_good,otherId, safePlace);
+                        List<int[]> other_safe_path = other_result.path;
+                        int other_leave_index = other_result.leave_index;
+
+                        if(cur_safe_path==null){
+                            List<int[]> tmp_path = other_path.subList(0,cur_path_index);
+                            Collections.reverse(tmp_path);
+                            cur_result = findSafePlace(tmp_path, 0,tmp_path.size()/2, map,cur_good, robotId,safePlace);
+                            cur_safe_path = cur_result.path;
+                            cur_leave_index = cur_result.leave_index;
+
+                        }
+
+                        if(other_safe_path==null){
+                            List<int[]> tmp_path = cur_path.subList(0,other_path_index);
+                            Collections.reverse(tmp_path);
+                            other_result = findSafePlace(tmp_path, 0,tmp_path.size()/2, map,other_good, otherId,safePlace);
+                            other_safe_path = other_result.path;
+                            other_leave_index = other_result.leave_index;
+                        }
+
+                        if(cur_safe_path==null&&other_safe_path==null){
+                            System.err.printf("(%d, %d)都无法计算安全路径%n",robotId,otherId);
+                        }else if(cur_safe_path!=null&&other_safe_path==null){
+                            updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,cur_leave_index,leave_pos_and_robot);
                         }else if(cur_safe_path == null){
-                            updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,left_pos_and_robot);
+                            updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,other_leave_index,leave_pos_and_robot);
                         }
                         else if (cur_safe_path.size() < other_safe_path.size()) {
-                            updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,left_pos_and_robot);
+                            updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,cur_leave_index,leave_pos_and_robot);
                         }
                         else {
-                            updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,left_pos_and_robot);
+                            updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,other_leave_index,leave_pos_and_robot);
                         }
                     }
                 }
@@ -276,44 +358,64 @@ public class AvoidCongest {
 
 
     // 更新robotId的路径为安全路径，并设置岔路口信息，以及在安全位置等待的小车id, 以方便小车在通过岔路口后，可以被释放
-    public static void updateStatus(List<List<int[]>> robotsPath,int robotId,int otherId,List<int[]> safe_path, int[][] safePlace,ArrayList<int []> [] left_pos_and_robot) {
+    public static void updateStatus(List<List<int[]>> robotsPath,int robotId,int otherId,List<int[]> safe_path, int[][] safePlace,int leave_index,int [][][] leave_pos_and_robot) {
         robotsPath.set(robotId, safe_path);
         int last_index = safe_path.size()-1;
-        int leave_index = safe_path.size()-4;
         safePlace[robotId][0] = safe_path.get(last_index)[0];
         safePlace[robotId][1] = safe_path.get(last_index)[1];
         // 去安全位置小车  添加岔路口的位置以及走该条路径的小车
-        left_pos_and_robot[otherId].add(new int[]{safe_path.get(leave_index)[0],safe_path.get(leave_index)[1],robotId});
+        leave_pos_and_robot[otherId][robotId][0] = safe_path.get(leave_index)[0];
+        leave_pos_and_robot[otherId][robotId][1] = safe_path.get(leave_index)[1];
     }
 
 
     // 检测小车是不是离开了岔路口的的位置，岔路口是指小车生成新路径开始的位置
-    public static void free_robot(List<List<int[]>> robotsPath, int[][] safePlace,ArrayList<int []> [] left_pos_and_robots){
-        for(int robotId =0;robotId<left_pos_and_robots.length;robotId++){
-            ArrayList<int []> left_pos_and_robot = left_pos_and_robots[robotId];
-            Iterator iterator = left_pos_and_robot.iterator();
-            while (iterator.hasNext()){
-                int [] y_x_robot = (int[]) iterator.next();
-                int y = y_x_robot[0];
-                int x = y_x_robot[1];
-                int otherId = y_x_robot[2];
-                List<int[]> cur_path = robotsPath.get(robotId);
-                if(isInPath(y,x,cur_path)==-1){
-                    iterator.remove();
-                    safePlace[otherId][0]=-1;
-                    safePlace[otherId][1]=-1;
-                }
-                ArrayList<int []> other_left_pos_and_robot = left_pos_and_robots[robotId];
-                Iterator other_iterator = other_left_pos_and_robot.iterator();
-                while (other_iterator.hasNext()){
-                    int [] other_y_x_robot = (int[]) other_iterator.next();
-                    if(other_y_x_robot[2]==robotId){
-                        safePlace[otherId][0]=-1;
-                        safePlace[otherId][1]=-1;
-                        iterator.remove();
+    public static void free_robot(List<List<int[]>> robotsPath, int[][] safePlace,int[][][] leave_pos_and_robots) {
+        for (int robotId = 0; robotId < leave_pos_and_robots.length; robotId++) {
+            int[][] leave_pos_and_robot = leave_pos_and_robots[robotId];
+            List<int[]> cur_path = robotsPath.get(robotId);
+            for (int waitID = 0; waitID < leave_pos_and_robot.length; waitID++) {
+                if(robotId==waitID)
+                    continue;
+                int y = leave_pos_and_robot[waitID][0];
+                int x = leave_pos_and_robot[waitID][1];
+                // 岔路口存在
+                if(y!=-1&&x!=-1){
+                    if(isInPath(y,x,cur_path)==-1){
+                        safePlace[waitID][0]=-1;
+                        safePlace[waitID][1]=-1;
+                        leave_pos_and_robot[waitID][0]=-1;
+                        leave_pos_and_robot[waitID][1]=-1;
+                    }else{
+                        int[][] other_leave_pos_and_robot = leave_pos_and_robots[waitID];
+                        if(other_leave_pos_and_robot[robotId][0]!=-1&&other_leave_pos_and_robot[robotId][1]!=-1) {
+                            safePlace[waitID][0]=-1;
+                            safePlace[waitID][1]=-1;
+                            leave_pos_and_robot[waitID][0]=-1;
+                            leave_pos_and_robot[waitID][1]=-1;
+                        }
                     }
                 }
             }
+        }
+    }
+
+    public static void showPath(List<int[]> p,int [][]map,int robotId){
+        int[][] look = new int[map.length][map[0].length];
+        for(int i = 0; i < map.length; i++){
+            System.arraycopy(map[i], 0, look[i], 0, map[0].length);
+        }
+        for(int[] pp : p){
+            look[pp[0]][pp[1]] = -3;
+        }
+        for(int i = map.length - 1; i >= 0; i--){
+            for(int j = 0; j < map[0].length; j++){
+                if(look[i][j] == -3)    System.err.print(robotId);
+                if(look[i][j] == -2)    System.err.print(' ');
+                if(look[i][j] == -1)    System.err.print('#');
+                if(look[i][j] >= 0)    System.err.print(' ');
+            }
+            System.err.print("\n");
         }
     }
 }

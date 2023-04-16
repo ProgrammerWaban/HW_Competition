@@ -15,18 +15,21 @@ public class Main {
     private static final PrintStream outStream = new PrintStream(new BufferedOutputStream(System.out), true);
 
     public static ThreadLocal<Integer> tl = new ThreadLocal<>();
-    private static String team = "";  //表示红蓝双方
+    public static String team = "";  //表示红蓝双方
     public static ThreadLocal<Integer> who = new ThreadLocal<>();
     private static dispatchingCenter dc = new dispatchingCenter();
     private static ArrayList<Workbench> workbenches = new ArrayList<>();
-    private static ArrayList<Robot> robots = new ArrayList<>();
+    public static ArrayList<Robot> robots = new ArrayList<>();
     private static List<List<int[]>> robotsPath = new ArrayList<>();
     private static int[][] map;
 
     private static int [][] SafePlace = new int[][]{{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
 
-    private static  ArrayList<int []> [] left_pos_and_robot = new ArrayList[]{
-            new ArrayList<int []>(),new ArrayList<int []>(),new ArrayList<int []>(),new ArrayList<int []>()
+    private static  int [][][] leave_pos_and_robot = new int[][][]{
+            {{-1,-1},{-1,-1},{-1,-1},{-1,-1}},
+            {{-1,-1},{-1,-1},{-1,-1},{-1,-1}},
+            {{-1,-1},{-1,-1},{-1,-1},{-1,-1}},
+            {{-1,-1},{-1,-1},{-1,-1},{-1,-1}},
     };
 
 
@@ -141,9 +144,9 @@ public class Main {
             }
 
             // 在合适的位置，释放安全位置的小车
-            AvoidCongest.free_robot(robotsPath,SafePlace,left_pos_and_robot);
+            AvoidCongest.free_robot(robotsPath,SafePlace,leave_pos_and_robot);
             // 防堵车
-            AvoidCongest.avoid_Congest(robotsPath,map,SafePlace,left_pos_and_robot,robots);
+            AvoidCongest.avoid_Congest(robotsPath,map,SafePlace,leave_pos_and_robot,robots);
 
             //  打印输出路径
 //            int[][] look = new int[map.length][map[0].length];
