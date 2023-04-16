@@ -48,4 +48,59 @@ public class Tool {
         list.set(A, list.get(B));
         list.set(B, temp);
     }
+
+    //  打印输出路径
+    public static void printMap(int[][] map, List<List<int[]>> robotsPath) {
+        int[][] look = new int[map.length][map[0].length];
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                look[i][j] = map[i][j];
+            }
+        }
+        for (List<int[]> p : robotsPath) {
+            for (int[] pp : p) {
+                look[pp[0]][pp[1]] = -3;
+            }
+        }
+        for (int i = map.length - 1; i >= 0; i--) {
+            for (int j = 0; j < map[0].length; j++) {
+                if (look[i][j] == -3) System.err.print('+');
+                if (look[i][j] == -2) System.err.print(' ');
+                if (look[i][j] == -1) System.err.print('#');
+                if (look[i][j] >= 0) System.err.print(' ');
+            }
+            System.err.print("\n");
+        }
+    }
+
+    //如果有一个机器人站在工作台上，就把这个工作台弄死
+    public static ArrayList<Workbench> isStandOnWorkbench(int[][] map_clone, int[][] map, ArrayList<Workbench> workbenches) {
+        ArrayList<Workbench> ret = new ArrayList<>();
+        for (Workbench workbench : workbenches) {
+            if (isEnemyRobotAround(map_clone, map, workbench)) {
+                workbench.isEnemyNotOn = false;
+                //workbench.setAlive(false);
+                ret.add(workbench);
+            }
+
+        }
+        return ret;
+    }
+
+    public static boolean isEnemyRobotAround(int[][] map_clone, int[][] map, Workbench workbench) {
+        int mapIndex1 = workbench.getyMap();
+        int mapIndex0 = workbench.getxMap();
+        int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
+                {1, 2}, {2, 1}, {-1, -2}, {-2, -1}, {1, -2}, {-1, 2}, {-2, 1}, {2, -1},
+                {0, 2}, {0, -2}, {2, 0}, {-2, 0}, {2, 2}, {-2, 2}, {2, -2}, {-2, -2}};
+        for (int i = 0; i < direction.length; i++) {
+            int tmp_Y = mapIndex0 + direction[i][0];
+            int tmp_X = mapIndex1 + direction[i][1];
+            if (tmp_Y >= map.length - 1 || tmp_Y < 1 || tmp_X < 1 || tmp_X >= map[0].length - 1) continue; //边界条件
+            if (map[tmp_Y][tmp_X] != map_clone[tmp_Y][tmp_X]) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
