@@ -22,6 +22,8 @@ public class Workbench {
     private int hungryFrame = 0;
     //工作台是否存在
     private boolean isAlive = true;
+    //工作台上是否有机器人
+    public boolean isEnemyNotOn = true;
     //无商品，记录到地图任意一点的距离
     private double[][] distMatWithNoGood;
     //有商品，记录到地图任意一点的距离
