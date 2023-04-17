@@ -168,22 +168,22 @@ public class Main {
             //计算 机器人的路线
             for (int robotId = 0; robotId < 4; robotId++) {
 
-                //测试用例
-                if (team.equals("BLUE") && robotId == 0) {
-                    Robot robot = robots.get(robotId);
-                    Workbench wb = new Workbench();
-                    wb.setyMap(30);
-                    wb.setxMap(29);
-                    int[] startXY = robot.getMatXY();
-                    int[] stopXY = new int[]{wb.getxMap(), wb.getyMap()};
-                    double[][] distMat = robot.getGoodID() == 0 ? wb.getDistMatWithNoGood() : wb.getDistMatWithGood();
-                    int hasGood = robot.getGoodID() == 0 ? 0 : 1;
-                    List<int[]> path;
-                    path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
-                    Collections.reverse(path);
-                    robotsPath.add(path);
-                    continue;
-                }
+//                //测试用例
+//                if (team.equals("BLUE") && robotId == 0) {
+//                    Robot robot = robots.get(robotId);
+//                    Workbench wb = new Workbench();
+//                    wb.setyMap(30);
+//                    wb.setxMap(29);
+//                    int[] startXY = robot.getMatXY();
+//                    int[] stopXY = new int[]{wb.getxMap(), wb.getyMap()};
+//                    double[][] distMat = robot.getGoodID() == 0 ? wb.getDistMatWithNoGood() : wb.getDistMatWithGood();
+//                    int hasGood = robot.getGoodID() == 0 ? 0 : 1;
+//                    List<int[]> path;
+//                    path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+//                    Collections.reverse(path);
+//                    robotsPath.add(path);
+//                    continue;
+//                }
 
                 Robot robot = robots.get(robotId);
                 int destinationID = dc.findDestinationIDByRobotID(robotId);
@@ -245,7 +245,7 @@ public class Main {
                 //计算到目的地所需要的Forward和Rotate
                 //robot.calForwardAndRotate(wb);
                 //BetterMove.adjustMovement(wb, robot);
-                AvoidCollide.avoidTailgate(robot, robots);
+                //AvoidCollide.avoidTailgate(robot, robots);
 //                //前进+旋转
 //                outStream.printf("forward %d %f\n", robotId, robot.getWantForward());
 //                outStream.printf("rotate %d %f\n", robotId, robot.getWantRotate());
