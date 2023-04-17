@@ -21,6 +21,8 @@ public class dispatchingCenter {
     private HashMap<Integer, List<Integer>> mapWBX = new HashMap<>();
     //记录<被占用的工作台列表>  出售该商品的工作台
     private HashSet<Integer> setWBX = new HashSet<>();
+    //记录机器人有物品但卖不出的帧数
+    private int[] framesOfNoWayToSellWithGoods = new int[]{0, 0, 0, 0};
 
     public dispatchingCenter() {
         skip.add(1);skip.add(2);skip.add(3);
@@ -105,7 +107,21 @@ public class dispatchingCenter {
         for (int robotId = 0; robotId < 4; robotId++) {
             //无目的地  放入robotsToBuySell
             if(robotsDestinationID[robotId] == -1 && robotsNextDestinationID[robotId] == -1){
-                robotsToBuySell.add(robotId);
+                //如果有商品，但是目的地和next目的地都为-1，那么就是工作台都死了，或者跳帧导致卖不出去
+                if(robots.get(robotId).getGoodID() != 0){
+                    //这个时候，超过10秒还是卖不了就销毁
+                    if(framesOfNoWayToSellWithGoods[robotId] > 500){
+                        robots.get(robotId).setDestroy(true);
+                    }
+                    else{
+                        framesOfNoWayToSellWithGoods[robotId]++;
+                        robotsToSell.add(robotId);
+                    }
+                }
+                else{
+                    framesOfNoWayToSellWithGoods[robotId] = 0;
+                    robotsToBuySell.add(robotId);
+                }
             }
             //去买    放入robotsToBuySell
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] != -1){
@@ -113,11 +129,23 @@ public class dispatchingCenter {
             }
             //去卖    放入robotsToSell
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
-                robotsToSell.add(robotId);
+                //如果目的工作台死了，就加入卖调度，否则不加
+                if(!workbenches.get(robotsDestinationID[robotId]).isAlive()){
+                    robotsToSell.add(robotId);
+                }
             }
         }
-        //findRoadToSell(robotsToSell, robots, workbenches);
+        findRoadToSell(robotsToSell, robots, workbenches);
         findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
+
+        //如果找到能卖的地方，为机器人清零 有物品但卖不出的帧数
+        for (int robotId = 0; robotId < 4; robotId++) {
+            if(framesOfNoWayToSellWithGoods[robotId] != 0){
+                if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
+                    framesOfNoWayToSellWithGoods[robotId] = 0;
+                }
+            }
+        }
     }
 
     //计算工作台优先级，并设置饥饿帧
@@ -286,7 +314,9 @@ public class dispatchingCenter {
         if(robotsToSell.size() == 0)    return;
         //取消预定的收购工作台，并取消目的地
         for(Integer robotId : robotsToSell){
-            deleteWBXByGoodIDAndWBID(robots.get(robotId).getGoodID(), robotsDestinationID[robotId]);
+            if(robotsDestinationID[robotId] != -1){
+                deleteWBXByGoodIDAndWBID(robots.get(robotId).getGoodID(), robotsDestinationID[robotId]);
+            }
             robotsDestinationID[robotId] = -1;
             if(isBookSellBuyWB[robotId] == 1){
                 isBookSellBuyWB[robotId] = 0;
