@@ -328,7 +328,9 @@ public class dispatchingCenter {
         //设置目的地，预定该商品的收购工作台
         for(int[] a : bestRoad){
             robotsDestinationID[a[0]] = a[1];
-            addWBXByGoodIDAndWBID(robots.get(a[0]).getGoodID(), a[1]);
+            if(a[1] != -1){
+                addWBXByGoodIDAndWBID(robots.get(a[0]).getGoodID(), a[1]);
+            }
             if(a[2] == 1){
                 isBookSellBuyWB[a[0]] = 1;
                 setWBX.add(a[1]);
