@@ -109,7 +109,7 @@ public class dispatchingCenter {
         for (int robotId = 0; robotId < 4; robotId++) {
             //无目的地  放入robotsToBuySell
             if(robotsDestinationID[robotId] == -1 && robotsNextDestinationID[robotId] == -1){
-                //如果有商品，但是目的地和next目的地都为-1，那么就是工作台都死了，或者跳帧导致卖不出去
+                //如果有商品，但是目的地和next目的地都为-1，那么就是工作台都死了
                 if(robots.get(robotId).getGoodID() != 0){
                     //这个时候，超过10秒还是卖不了就销毁
                     if(framesOfNoWayToSellWithGoods[robotId] > 500){
@@ -127,7 +127,13 @@ public class dispatchingCenter {
             }
             //去买    放入robotsToBuySell
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] != -1){
-                robotsToBuySell.add(robotId);
+                //如果机器人有物品，但是目的地和next目的地都不为-1，想去买，那么就是跳帧导致的卖不出
+                if(robots.get(robotId).getGoodID() != 0){
+                    robotsToSell.add(robotId);
+                }
+                else{
+                    robotsToBuySell.add(robotId);
+                }
             }
             //去卖    放入robotsToSell
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
@@ -139,6 +145,9 @@ public class dispatchingCenter {
                 else if(!workbenches.get(robotsDestinationID[robotId]).isAlive()){
                     robotsToSell.add(robotId);
                 }
+//                else{
+//                    robotsToSell.add(robotId);
+//                }
             }
         }
         findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
@@ -298,8 +307,11 @@ public class dispatchingCenter {
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
                 //取消收购工作台的预定
                 deleteWBXByGoodIDAndWBID(goodsIdForBuy[robotId], robotsDestinationID[robotId]);
+                if(isBookSellBuyWB[robotId] == 1){
+                    isBookSellBuyWB[robotId] = 0;
+                    setWBX.remove(robotsDestinationID[robotId]);
+                }
                 robotsDestinationID[robotId] = -1;
-                robotsNextDestinationID[robotId] = -1;
             }
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] != -1){
                 setOffDestAndNextDestAndNoBookWB(robotId, robotsDestinationID[robotId], robotsNextDestinationID[robotId], isBookSellBuyWB[robotId], workbenches);
@@ -326,13 +338,16 @@ public class dispatchingCenter {
         if(robotsToSell.size() == 0)    return;
         //取消预定的收购工作台，并取消目的地
         for(Integer robotId : robotsToSell){
-            if(robotsDestinationID[robotId] != -1){
+            if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
                 deleteWBXByGoodIDAndWBID(robots.get(robotId).getGoodID(), robotsDestinationID[robotId]);
+                if(isBookSellBuyWB[robotId] == 1){
+                    isBookSellBuyWB[robotId] = 0;
+                    setWBX.remove(robotsDestinationID[robotId]);
+                }
+                robotsDestinationID[robotId] = -1;
             }
-            robotsDestinationID[robotId] = -1;
-            if(isBookSellBuyWB[robotId] == 1){
-                isBookSellBuyWB[robotId] = 0;
-                setWBX.remove(robotsDestinationID[robotId]);
+            if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] != -1){
+                setOffDestAndNextDestAndNoBookWB(robotId, robotsDestinationID[robotId], robotsNextDestinationID[robotId], isBookSellBuyWB[robotId], workbenches);
             }
         }
         //计算卖路线     [robotId, dest, isBook]
