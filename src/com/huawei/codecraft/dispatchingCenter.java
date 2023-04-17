@@ -423,7 +423,7 @@ public class dispatchingCenter {
                                 }
                                 robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
                                 if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                    totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()));
+                                    totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
                                     break;
                                 }
                             }
@@ -498,7 +498,7 @@ public class dispatchingCenter {
                                     }
                                     robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
                                     if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                        totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()));
+                                        totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
                                         break;
                                     }
                                 }
@@ -637,7 +637,7 @@ public class dispatchingCenter {
                         }
                         robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
                         if(!robotsGoods.contains(wb.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                            totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()));
+                            totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
                             break;
                         }
                     }
@@ -697,7 +697,7 @@ public class dispatchingCenter {
     //根据距离计算时间，与剩余时间比较，是否足够去买卖
     public boolean isEnoughTimeToBuySell(double distance, double speed, int remainFrame, int buyOrSell){
         if("RED".equals(Main.team))    speed = 7;
-        double multiple = buyOrSell == 0 ? 1.2 : 1.1;
+        double multiple = buyOrSell == 0 ? 1.15 : 1.08;
         double time = distance / speed;
         time *= multiple;
         return time * 50 < remainFrame;
