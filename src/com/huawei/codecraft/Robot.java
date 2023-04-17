@@ -267,6 +267,8 @@ public class Robot {
                 dc.deleteWBXByGoodIDAndWBID(goodID, destinationID);
                 //释放收购工作台的出售预定
                 dc.delete_setWBXWithWBID(destinationID);
+                //出售物品后修改机器人手上的商品ID
+                goodID = 0;
 
 //                //计算卖的总金额
 //                int[] value = new int[]{0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
