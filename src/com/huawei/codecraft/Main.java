@@ -156,6 +156,12 @@ public class Main {
             //调度中心
             dc.dispatching(robots, workbenches);
 
+            //销毁物品
+            for (int robotId = 0; robotId < 4; robotId++) {
+                Robot robot = robots.get(robotId);
+                if(robot.isDestroy())   builder.append("destroy").append(' ').append(robotId).append('\n');
+            }
+
             //要将刚才弄死的工作台还原一下
             if (team.equals("RED")) {
                 for (Workbench onWorkbench : standOnWorkbench) {
@@ -241,7 +247,7 @@ public class Main {
                     }
                 }
                 //靠经墙壁减速(其实这里也可以设置成只有红方才执行)
-                BetterMove.closeToWall_slowDown(map_clone, robot, 1.8);
+                //BetterMove.closeToWall_slowDown(map_clone, robot, 1.8);
                 //计算到目的地所需要的Forward和Rotate
                 //robot.calForwardAndRotate(wb);
                 //BetterMove.adjustMovement(wb, robot);
