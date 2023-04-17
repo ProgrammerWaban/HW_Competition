@@ -251,6 +251,8 @@ public class Robot {
                 buy = true;
                 //购买物品后修改机器人手上的商品ID
                 goodID = wb.getID();
+                //购买物品后修改工作台的产品状态
+                wb.setProduct_status(0);
                 //修改目的地和next目的地
                 dc.changeRobotDestinationIDByRobotID(robotID, nextDestinationID);
                 dc.changeRobotNextDestinationIDByRobotID(robotID, -1);
