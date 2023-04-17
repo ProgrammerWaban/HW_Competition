@@ -116,7 +116,7 @@ public class dispatchingCenter {
                 robotsToSell.add(robotId);
             }
         }
-        findRoadToSell(robotsToSell, robots, workbenches);
+        //findRoadToSell(robotsToSell, robots, workbenches);
         findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
     }
 
@@ -438,7 +438,7 @@ public class dispatchingCenter {
                                 isBook = 1;
                                 for(Robot r : Main.robots){
                                     if(r == robot)  continue;
-                                    if(r.getGoodID() == 0 && wb1.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (robotToSellDistance - 50)) isBook = 0;
+                                    if(r.getGoodID() == 0 && wb1.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (robotToSellDistance - 50) / 2) isBook = 0;
                                 }
                             }
                         }
@@ -513,7 +513,7 @@ public class dispatchingCenter {
                                     isBook = 1;
                                     for(Robot r : Main.robots){
                                         if(r == robot)  continue;
-                                        if(r.getGoodID() == 0 && wb1.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (robotToSellDistance - 50)) isBook = 0;
+                                        if(r.getGoodID() == 0 && wb1.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (robotToSellDistance - 50) / 2) isBook = 0;
                                     }
                                 }
                             }
@@ -651,7 +651,7 @@ public class dispatchingCenter {
                         isBook = 1;
                         for(Robot r : Main.robots){
                             if(r == robot)  continue;
-                            if(r.getGoodID() == 0 && wb.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (distance - 50)) isBook = 0;
+                            if(r.getGoodID() == 0 && wb.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (distance - 50) / 2) isBook = 0;
                         }
                     }
                 }
