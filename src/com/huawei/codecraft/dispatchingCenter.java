@@ -434,7 +434,13 @@ public class dispatchingCenter {
                             maxValuePerDistance = valuePerDistance;
                             destinationID = i;
                             nextDestinationID = l;
-                            if(wb1.getProduct_status() == 1)    isBook = 1;
+                            if(wb1.getProduct_status() == 1){
+                                isBook = 1;
+                                for(Robot r : Main.robots){
+                                    if(r == robot)  continue;
+                                    if(r.getGoodID() == 0 && wb1.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (robotToSellDistance - 50)) isBook = 0;
+                                }
+                            }
                         }
                     }
                 }
@@ -503,7 +509,13 @@ public class dispatchingCenter {
                                 maxValuePerDistance = valuePerDistance;
                                 destinationID = i;
                                 nextDestinationID = l;
-                                if(wb1.getProduct_status() == 1)    isBook = 1;
+                                if(wb1.getProduct_status() == 1){
+                                    isBook = 1;
+                                    for(Robot r : Main.robots){
+                                        if(r == robot)  continue;
+                                        if(r.getGoodID() == 0 && wb1.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (robotToSellDistance - 50)) isBook = 0;
+                                    }
+                                }
                             }
                         }
                     }
@@ -635,7 +647,13 @@ public class dispatchingCenter {
                 if(valuePerDistance > maxValuePerDistance){
                     maxValuePerDistance = valuePerDistance;
                     destination = l;
-                    if(wb.getProduct_status() == 1) isBook = 1;
+                    if(wb.getProduct_status() == 1){
+                        isBook = 1;
+                        for(Robot r : Main.robots){
+                            if(r == robot)  continue;
+                            if(r.getGoodID() == 0 && wb.getDistMatWithNoGood()[r.getMatXY()[0]][r.getMatXY()[1]] < (distance - 50)) isBook = 0;
+                        }
+                    }
                 }
             }
         }
