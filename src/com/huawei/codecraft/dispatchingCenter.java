@@ -23,6 +23,8 @@ public class dispatchingCenter {
     private HashSet<Integer> setWBX = new HashSet<>();
     //记录机器人有物品但卖不出的帧数
     private int[] framesOfNoWayToSellWithGoods = new int[]{0, 0, 0, 0};
+    //记录买的商品ID，用于防止跳帧买不到商品，不知道商品而无法解除预定
+    public int[] goodsIdForBuy = new int[]{0, 0, 0, 0};
 
     public dispatchingCenter() {
         skip.add(1);skip.add(2);skip.add(3);
@@ -129,14 +131,18 @@ public class dispatchingCenter {
             }
             //去卖    放入robotsToSell
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
+                //如果无商品，但是目的地不为-1，next目的地为-1，那么就是跳帧导致的买不到
+                if(robots.get(robotId).getGoodID() == 0){
+                    robotsToBuySell.add(robotId);
+                }
                 //如果目的工作台死了，就加入卖调度，否则不加
-                if(!workbenches.get(robotsDestinationID[robotId]).isAlive()){
+                else if(!workbenches.get(robotsDestinationID[robotId]).isAlive()){
                     robotsToSell.add(robotId);
                 }
             }
         }
-        findRoadToSell(robotsToSell, robots, workbenches);
         findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
+        findRoadToSell(robotsToSell, robots, workbenches);
 
         //如果找到能卖的地方，为机器人清零 有物品但卖不出的帧数
         for (int robotId = 0; robotId < 4; robotId++) {
@@ -289,6 +295,12 @@ public class dispatchingCenter {
         if(robotsToBuySell.size() == 0) return;
         //取消去买去卖机器人的目的地、next目的地,取消预定
         for(Integer robotId : robotsToBuySell){
+            if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] == -1){
+                //取消收购工作台的预定
+                deleteWBXByGoodIDAndWBID(goodsIdForBuy[robotId], robotsDestinationID[robotId]);
+                robotsDestinationID[robotId] = -1;
+                robotsNextDestinationID[robotId] = -1;
+            }
             if(robotsDestinationID[robotId] != -1 && robotsNextDestinationID[robotId] != -1){
                 setOffDestAndNextDestAndNoBookWB(robotId, robotsDestinationID[robotId], robotsNextDestinationID[robotId], isBookSellBuyWB[robotId], workbenches);
             }

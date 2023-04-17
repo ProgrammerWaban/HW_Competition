@@ -251,6 +251,8 @@ public class Robot {
                 buy = true;
                 //购买物品后修改机器人手上的商品ID
                 goodID = wb.getID();
+                //记录购买商品的ID，防止跳帧而买不了商品，又不知道商品ID的情况
+                dc.goodsIdForBuy[robotID] = wb.getID();
                 //购买物品后修改工作台的产品状态
                 wb.setProduct_status(0);
                 //修改目的地和next目的地
