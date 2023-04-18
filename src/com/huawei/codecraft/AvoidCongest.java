@@ -337,7 +337,7 @@ public class AvoidCongest {
                         }
 
                         if(cur_safe_path==null&&other_safe_path==null){
-                            System.err.printf("(%d, %d)都无法计算安全路径%n",robotId,otherId);
+//                            System.err.printf("(%d, %d)都无法计算安全路径%n",robotId,otherId);
                         }else if(cur_safe_path!=null&&other_safe_path==null){
                             updateStatus(robotsPath,robotId,otherId,cur_safe_path,safePlace,cur_leave_index,leave_pos_and_robot);
                         }else if(cur_safe_path == null){
@@ -350,7 +350,26 @@ public class AvoidCongest {
                             updateStatus(robotsPath,otherId,robotId,other_safe_path,safePlace,other_leave_index,leave_pos_and_robot);
                         }
                     }
+                } else if (other_path.size() == 0 && cur_path.size() > 0 || other_path.size() > 0) {
+//                    System.err.println("出现路径为0的情况");
+                    int MoveID = other_path.size()==0?otherId:robotId;
+                    int tmp_ID = other_path.size()>0?otherId:robotId;
+                    Robot move_robot = robots.get(MoveID);
+                    int good_status = move_robot.getGoodID();
+                    int move_x = (int) Math.floor(move_robot.getX()*2);
+                    int move_y = (int)Math.floor(move_robot.getY()*2);
+                    List<int[]> target_path = other_path.size()==0?cur_path:other_path;
+                    int target_index = isInPath(move_y, move_x, target_path);
+                    if(target_index!=-1) {
+                        int target_end = target_path.size();
+                        Result result = findSafePlace(target_path, target_index, target_end, map, good_status, MoveID, safePlace);
+                        if (result.path != null) {
+                            updateStatus(robotsPath, MoveID, tmp_ID, result.path, safePlace, result.leave_index, leave_pos_and_robot);
+                        }
+                    }
+
                 }
+
                 otherId++;
             }
         }
