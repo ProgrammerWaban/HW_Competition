@@ -467,23 +467,36 @@ public class dispatchingCenter {
                         double totalValue = goodValue + futureValue;
                         //如果7缺一个原材料就提高对应的权值
                         if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
-                            List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
-                            for(Integer l1 : list1){
-                                Workbench wb2 = workbenches.get(l1);
-                                //获取机器人手上的物品+工作台的原材料
-                                HashSet<Integer> robotsGoods = new HashSet<>();
-                                for(Robot r : Main.robots){
-                                    if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
+                            int num = 0;
+                            if(robotsBestRoad1 != null){
+                                for(int[] road : robotsBestRoad1){
+                                    if(road[2] == wb1.getID())  num++;
                                 }
-                                for(Workbench w : workbenches){
-                                    if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
-                                        if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                            }
+                            if(robotsBestRoad2 != null){
+                                for(int[] road : robotsBestRoad2){
+                                    if(road[1] == wb1.getID())  num++;
+                                }
+                            }
+                            if(num < 2){
+                                List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
+                                for(Integer l1 : list1){
+                                    Workbench wb2 = workbenches.get(l1);
+                                    //获取机器人手上的物品+工作台的原材料
+                                    HashSet<Integer> robotsGoods = new HashSet<>();
+                                    for(Robot r : Main.robots){
+                                        if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
                                     }
-                                }
-                                robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
-                                if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                    totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
-                                    break;
+                                    for(Workbench w : workbenches){
+                                        if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
+                                            if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                        }
+                                    }
+                                    robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
+                                    if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
+                                        totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -542,23 +555,36 @@ public class dispatchingCenter {
                             double totalValue = goodValue + futureValue;
                             //如果7缺一个原材料就提高对应的权值
                             if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
-                                List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
-                                for(Integer l1 : list1){
-                                    Workbench wb2 = workbenches.get(l1);
-                                    //获取机器人手上的物品+工作台的原材料
-                                    HashSet<Integer> robotsGoods = new HashSet<>();
-                                    for(Robot r : Main.robots){
-                                        if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
+                                int num = 0;
+                                if(robotsBestRoad1 != null){
+                                    for(int[] road : robotsBestRoad1){
+                                        if(road[2] == wb1.getID())  num++;
                                     }
-                                    for(Workbench w : workbenches){
-                                        if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
-                                            if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                }
+                                if(robotsBestRoad2 != null){
+                                    for(int[] road : robotsBestRoad2){
+                                        if(road[1] == wb1.getID())  num++;
+                                    }
+                                }
+                                if(num < 2){
+                                    List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb1.getID()), getWBXListByGoodID(wb1.getID()));
+                                    for(Integer l1 : list1){
+                                        Workbench wb2 = workbenches.get(l1);
+                                        //获取机器人手上的物品+工作台的原材料
+                                        HashSet<Integer> robotsGoods = new HashSet<>();
+                                        for(Robot r : Main.robots){
+                                            if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
                                         }
-                                    }
-                                    robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
-                                    if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                        totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
-                                        break;
+                                        for(Workbench w : workbenches){
+                                            if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
+                                                if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                            }
+                                        }
+                                        robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
+                                        if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
+                                            totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -681,23 +707,36 @@ public class dispatchingCenter {
                 double totalValue = goodValue + futureValue;
                 //如果7缺一个原材料就提高对应的权值
                 if(goodID == 1 || goodID == 2 || goodID == 3){
-                    List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb.getID()), getWBXListByGoodID(wb.getID()));
-                    for(Integer l1 : list1){
-                        Workbench wb2 = workbenches.get(l1);
-                        //获取机器人手上的物品+工作台的原材料
-                        HashSet<Integer> robotsGoods = new HashSet<>();
-                        for(Robot r : Main.robots){
-                            if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
+                    int num = 0;
+                    if(robotsBestRoad1 != null){
+                        for(int[] road : robotsBestRoad1){
+                            if(road[2] == wb.getID())  num++;
                         }
-                        for(Workbench w : workbenches){
-                            if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
-                                if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                    }
+                    if(robotsBestRoad2 != null){
+                        for(int[] road : robotsBestRoad2){
+                            if(road[1] == wb.getID())  num++;
+                        }
+                    }
+                    if(num < 2){
+                        List<Integer> list1 = Tool.calDifferenceWithABList(getWBListByGoodID(wb.getID()), getWBXListByGoodID(wb.getID()));
+                        for(Integer l1 : list1){
+                            Workbench wb2 = workbenches.get(l1);
+                            //获取机器人手上的物品+工作台的原材料
+                            HashSet<Integer> robotsGoods = new HashSet<>();
+                            for(Robot r : Main.robots){
+                                if(r.getGoodID() == 4 || r.getGoodID() == 5 || r.getGoodID() == 6)  robotsGoods.add(r.getGoodID());
                             }
-                        }
-                        robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
-                        if(!robotsGoods.contains(wb.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                            totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
-                            break;
+                            for(Workbench w : workbenches){
+                                if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
+                                    if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                }
+                            }
+                            robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
+                            if(!robotsGoods.contains(wb.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
+                                totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
+                                break;
+                            }
                         }
                     }
                 }
