@@ -287,15 +287,15 @@ public class Robot {
         for (int i = 0; i < 170; i = i + 4) {
             double angle_willAdd = Math.toRadians(i);
             singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle + angle_willAdd, radar[i]);
-            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle - angle_willAdd, radar[360 - 1 - i]);
+            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle - angle_willAdd - Math.toRadians(1), radar[360 - 1 - i]);
         }
 
     }
 
     //用于判断在一条线上是否有障碍物，进而来更新地图
     private void singleLineOfRadarIsRobot(int[][] map_clone, int[][] map, ArrayList<Robot> robots, double theta, double distance) {
-        double x_add = x + (distance + 0.1) * Math.cos(theta);
-        double y_add = y + (distance + 0.1) * Math.sin(theta);
+        double x_add = x + (distance + 0.01) * Math.cos(theta);
+        double y_add = y + (distance + 0.01) * Math.sin(theta);
         int mapIndex0 = (int) (y_add / 0.5);
         int mapIndex1 = (int) (x_add / 0.5);
         if (mapIndex0 < 1 || mapIndex0 > 98 || mapIndex1 < 1 || mapIndex1 > 98) return;
@@ -354,7 +354,8 @@ public class Robot {
 
     //判断一个点周围的点是否存在障碍物（缩小这个雷达计算误差）
     private boolean isBarrierAround(int nowY, int nowX, int[][] map) {
-        int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        //int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        int[][] direction = new int[][]{{0, 0}};
         for (int i = 0; i < direction.length; i++) {
             int tmp_x = nowY + direction[i][0];
             int tmp_y = nowX + direction[i][1];
