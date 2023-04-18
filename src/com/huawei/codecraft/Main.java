@@ -203,6 +203,11 @@ public class Main {
                         stopXY = new int[]{wb.getxMap(), wb.getyMap()};
                     else
                         stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
+                    //如果终点不可达，就直接返回空路径，不然找遍全地图
+                    if(map_clone[stopXY[0]][stopXY[1]] == -1 || !wb.isEnemyNotOn){
+                        robotsPath.add(new ArrayList<>());
+                        continue;
+                    }
                     double[][] distMat = robot.getGoodID() == 0 ? wb.getDistMatWithNoGood() : wb.getDistMatWithGood();
                     int hasGood = robot.getGoodID() == 0 ? 0 : 1;
                     List<int[]> path;
