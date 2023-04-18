@@ -150,8 +150,8 @@ public class dispatchingCenter {
 //                }
             }
         }
-        findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
         findRoadToSell(robotsToSell, robots, workbenches);
+        findRoadToBuyAndSell(robotsToBuySell, robots, workbenches);
 
         //如果找到能卖的地方，为机器人清零 有物品但卖不出的帧数
         for (int robotId = 0; robotId < 4; robotId++) {
@@ -460,11 +460,10 @@ public class dispatchingCenter {
                         futureValue /= nn;
                         if(wb1.getID() == 7)    futureValue *= 2;
                         if(wb1.getProduct_status() == 1 || wb1.getRemain_frame() > -1){
-                            if(wb1.getID() != 7)    futureValue /= 6;
+                            if(wb1.getID() != 7)    futureValue /= 3;
                             else    futureValue /= 2;
                         }
                         if(wb.getID() == 7) futureValue += valueArray[7];
-                        double totalValue = goodValue + futureValue;
                         //如果7缺一个原材料就提高对应的权值
                         if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
                             int num = 0;
@@ -489,17 +488,20 @@ public class dispatchingCenter {
                                     }
                                     for(Workbench w : workbenches){
                                         if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
-                                            if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                            if(w.getProduct_status() == 1 || w.getRemain_frame() > 0)  robotsGoods.add(w.getID());
                                         }
                                     }
                                     robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
                                     if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                        totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
+                                        futureValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
                                         break;
                                     }
                                 }
+                            }else{
+                                futureValue /= 2;
                             }
                         }
+                        double totalValue = goodValue + futureValue;
                         //出售赚的钱 / 总路径长度     取最大的
                         double valuePerDistance = totalValue / robotToSellDistance;
                         if(valuePerDistance > maxValuePerDistance){
@@ -548,11 +550,10 @@ public class dispatchingCenter {
                             futureValue /= nn;
                             if(wb1.getID() == 7)    futureValue *= 2;
                             if(wb1.getProduct_status() == 1 || wb1.getRemain_frame() > -1){
-                                if(wb1.getID() != 7)    futureValue /= 6;
+                                if(wb1.getID() != 7)    futureValue /= 3;
                                 else    futureValue /= 2;
                             }
                             if(wb.getID() == 7) futureValue += valueArray[7];
-                            double totalValue = goodValue + futureValue;
                             //如果7缺一个原材料就提高对应的权值
                             if(wb.getID() == 1 || wb.getID() == 2 || wb.getID() == 3){
                                 int num = 0;
@@ -577,17 +578,20 @@ public class dispatchingCenter {
                                         }
                                         for(Workbench w : workbenches){
                                             if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
-                                                if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                                if(w.getProduct_status() == 1 || w.getRemain_frame() > 0)  robotsGoods.add(w.getID());
                                             }
                                         }
                                         robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
                                         if(!robotsGoods.contains(wb1.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                            totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
+                                            futureValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
                                             break;
                                         }
                                     }
+                                }else{
+                                    futureValue /= 2;
                                 }
                             }
+                            double totalValue = goodValue + futureValue;
                             //出售赚的钱 / 总路径长度     取最大的
                             double valuePerDistance = totalValue / robotToSellDistance;
                             if(valuePerDistance > maxValuePerDistance){
@@ -700,11 +704,10 @@ public class dispatchingCenter {
                 futureValue /= nn;
                 if(wb.getID() == 7)    futureValue *= 2;
                 if(wb.getProduct_status() == 1 || wb.getRemain_frame() > -1){
-                    if(wb.getID() != 7) futureValue /= 6;
+                    if(wb.getID() != 7) futureValue /= 3;
                     else futureValue /= 2;
                 }
                 if(goodID == 7) futureValue += valueArray[7];
-                double totalValue = goodValue + futureValue;
                 //如果7缺一个原材料就提高对应的权值
                 if(goodID == 1 || goodID == 2 || goodID == 3){
                     int num = 0;
@@ -729,17 +732,20 @@ public class dispatchingCenter {
                             }
                             for(Workbench w : workbenches){
                                 if(w.getID() == 4 || w.getID() == 5 || w.getID() == 6){
-                                    if(w.getProduct_status() == 1)  robotsGoods.add(w.getID());
+                                    if(w.getProduct_status() == 1 || w.getRemain_frame() > 0)  robotsGoods.add(w.getID());
                                 }
                             }
                             robotsGoods.addAll(Tool.changeRawToList(wb2.getRaw()));
                             if(!robotsGoods.contains(wb.getID()) && wb2.getNeeds().size() - robotsGoods.size() < 3){
-                                totalValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
+                                futureValue += (valueArray[wb2.getID()] / nn / (wb2.getNeeds().size() - robotsGoods.size()) / 3);
                                 break;
                             }
                         }
+                    }else{
+                        futureValue /= 2;
                     }
                 }
+                double totalValue = goodValue + futureValue;
                 //出售赚的钱 / 总路径长度     取最大的
                 double valuePerDistance = totalValue / distance;
                 if(valuePerDistance > maxValuePerDistance){
