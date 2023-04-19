@@ -19,6 +19,7 @@ public class Main {
     public static ArrayList<Workbench> enemyWorkbenches = new ArrayList<>();
     public static ArrayList<Robot> robots = new ArrayList<>();
     public static ArrayList<Integer> robotsToAttack = new ArrayList<>();
+    public static int[] enemyWB45670 = null;  //记录对方的45670工作台id(各一个)
     private static List<List<int[]>> robotsPath = new ArrayList<>();
     private static int[][] map;
 
@@ -108,6 +109,25 @@ public class Main {
                 robotsToAttack.add(i);
             }
         }
+        //为每个敌方工作台计算到各个点的距离
+        for (Workbench wb : enemyWorkbenches){
+            double[][] distMatWithNoGood = new double[100][100];
+            double[][] distMatWithGood = new double[100][100];
+            for(int i = 0; i < 100; i++){
+                for(int j = 0; j < 100; j++){
+                    distMatWithNoGood[i][j] = Double.MAX_VALUE;
+                    distMatWithGood[i][j] = Double.MAX_VALUE;
+                }
+            }
+            //计算
+            SearchAlgorithm.bfs(new int[]{wb.getxMap(), wb.getyMap()}, map, distMatWithNoGood, 0);
+            SearchAlgorithm.bfs(new int[]{wb.getxMap(), wb.getyMap()}, map, distMatWithGood, 1);
+
+            wb.setDistMatWithNoGood(distMatWithNoGood);
+            wb.setDistMatWithGood(distMatWithGood);
+        }
+        //找对面的45670，用来进攻
+        enemyWB45670 = dc.findShortPath45670(enemyWorkbenches);
         //初始化结束
         outStream.print("OK\n");
 
@@ -172,6 +192,9 @@ public class Main {
 
             //调度中心
             dc.dispatching(robots, workbenches);
+
+            //进攻
+            dc.attack(robots, robotsToAttack, enemyWorkbenches);
 
             //销毁物品
             for (int robotId = 0; robotId < 4; robotId++) {

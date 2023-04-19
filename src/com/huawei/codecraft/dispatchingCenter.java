@@ -25,6 +25,12 @@ public class dispatchingCenter {
     private int[] framesOfNoWayToSellWithGoods = new int[]{0, 0, 0, 0};
     //记录买的商品ID，用于防止跳帧买不到商品，不知道商品而无法解除预定
     public int[] goodsIdForBuy = new int[]{0, 0, 0, 0};
+    //记录每个机器人没有工作的帧数
+    private int[] framesOfNoWork = new int[]{0, 0, 0, 0};
+    //进攻点
+    private int[] attackDestinationID = new int[]{-1, -1, -1, -1};
+    //next进攻点
+    private int[] attackNextDestinationID = new int[]{-1, -1, -1, -1};
 
     public dispatchingCenter() {
         skip.add(1);skip.add(2);skip.add(3);
@@ -807,4 +813,96 @@ public class dispatchingCenter {
         return time * 50 < remainFrame;
     }
 
+    //进攻入口
+    public void attack(ArrayList<Robot> robots, ArrayList<Integer> robotIdToAttack, ArrayList<Workbench> enemyWorkbenchs) {
+        List<Integer> robotsToAttack = new ArrayList<>();
+        for (int i = 0; i < robots.size(); i++) {
+            Robot robot = robots.get(i);
+            boolean toAttack = true;
+            //不在进攻列表，就判断10秒内有没有工作，没有就也去进攻
+            if (!robotIdToAttack.contains(i)) {
+                if (robotsDestinationID[i] == -1 && robotsNextDestinationID[i] == -1 && robot.getGoodID() == 0) {
+                    if (framesOfNoWork[i] < 500) {
+                        framesOfNoWork[i]++;
+                        toAttack = false;
+                    } else {
+                        //robotIdToAttack.add(i);
+                    }
+                } else {
+                    //有工作了就清0
+                    framesOfNoWork[i] = 0;
+                    toAttack = false;
+                    //把攻击任务清空
+                    attackDestinationID[i] = -1;
+                    attackNextDestinationID[i] = -1;
+                }
+            }
+            if (toAttack) {
+                if (attackDestinationID[i] == -1 && attackNextDestinationID[i] == -1) {
+                    robotsToAttack.add(i);
+                }
+            }
+        }
+        //去分配进攻任务
+        findRoadToAttack(robots, robotsToAttack, enemyWorkbenchs);
+    }
+
+    //分配进攻任务
+    public void findRoadToAttack(ArrayList<Robot> robots, List<Integer> robotIdToAttack, ArrayList<Workbench> enemyWorkbenchs){
+        //找7
+        int[] best45670 = Main.enemyWB45670;
+        //随机分配任务
+        for (Integer id : robotIdToAttack){
+            //Robot robot = robots.get(id);
+            int r = (int)(Math.random() * 10) % 5;
+            attackDestinationID[id] = best45670[r];
+            attackNextDestinationID[id] = best45670[3];
+        }
+    }
+
+    //找敌方的7，和456距离最短的7
+    public int[] findShortPath45670(ArrayList<Workbench> enemyWorkbenchs) {
+        int[] best45670 = new int[]{-1, -1, -1, -1, -1};
+        double minSum = Double.MAX_VALUE;
+        for (Workbench wb : enemyWorkbenchs){
+            if (wb.getID() == 7) {
+                double dist4 = Double.MAX_VALUE / 10;
+                double dist5 = Double.MAX_VALUE / 10;
+                double dist6 = Double.MAX_VALUE / 10;
+                double dist0 = Double.MAX_VALUE / 10;
+                int id4 = -1;
+                int id5 = -1;
+                int id6 = -1;
+                int id0 = -1;
+                for (Workbench wb1 : enemyWorkbenchs){
+                    if (wb1.getID() == 4) {
+                        dist4 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist4);
+                        id4 = enemyWorkbenchs.indexOf(wb1);
+                    }
+                    if (wb1.getID() == 5) {
+                        dist5 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist5);
+                        id5 = enemyWorkbenchs.indexOf(wb1);
+                    }
+                    if (wb1.getID() == 6) {
+                        dist6 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist6);
+                        id6 = enemyWorkbenchs.indexOf(wb1);
+                    }
+                    if (wb1.getID() == 8 || wb1.getID() == 9) {
+                        dist0 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist0);
+                        id0 = enemyWorkbenchs.indexOf(wb1);
+                    }
+                }
+                double sum = dist4 + dist5 + dist6 + dist0;
+                if (sum < minSum) {
+                    minSum = sum;
+                    best45670[0] = id4;
+                    best45670[1] = id5;
+                    best45670[2] = id6;
+                    best45670[3] = enemyWorkbenchs.indexOf(wb);
+                    best45670[4] = id0;
+                }
+            }
+        }
+        return best45670;
+    }
 }
