@@ -227,6 +227,11 @@ public class BetterMove {
             if (Math.pow(robot.getLineSpend_x(), 2) + Math.pow(robot.getLineSpend_y(), 2) < 3) {
                 ints = path.get(1);
             }
+            //如果是个正方形的四个点就需要特殊处理
+            if (path.size() > 4 && isSquare(path)) {
+                System.err.println("=======");
+                ints = path.get(4);
+            }
             //根据目标点是否靠墙判断走哪一根线
             if (ints[0] + 1 >= 100 || map[ints[0] + 1][ints[1]] == -1) {
                 //障碍物在上面,走下面这个线
@@ -470,5 +475,32 @@ public class BetterMove {
         } else {
             return true;
         }
+    }
+
+    //判断是不是存在正方形路径
+    public static boolean isSquare(List<int[]> path) {
+        //如果是个正方形的四个点就需要特殊处理
+        ArrayList<int[]> sqr = new ArrayList<>();
+        int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        for (int i = 0; i < direction.length; i++) {
+            int mapIndex0 = path.get(0)[0] + direction[i][0];
+            int mapIndex1 = path.get(0)[1] + direction[i][1];
+            sqr.add(new int[]{mapIndex0, mapIndex1});
+        }
+        for (int i = 0; i < 4; i++) {
+            if (!contains_(sqr, path.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean contains_(ArrayList<int[]> sqr, int[] ints) {
+        for (int[] ints1 : sqr) {
+            if (ints[0] == ints1[0] && ints[1] == ints1[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 }
