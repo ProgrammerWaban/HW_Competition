@@ -298,7 +298,6 @@ public class Main {
             }
 
             robotsPath.clear();
-            robots.clear();
 
             builder.append("OK").append('\n');
             outStream.print(builder);
@@ -322,7 +321,15 @@ public class Main {
                 for (int i = 0; i < line.length(); i++) {
                     char c = line.charAt(i);
                     if (c == '#') map[x][i] = -1;
-                    else if (c == '.' || c == 'A' || c == 'B') map[x][i] = -2;
+                    else if (c == '.' || c == 'A' || c == 'B'){
+                        map[x][i] = -2;
+                        if ("BLUE".equals(team) && c == 'A') {
+                            robots.add(new Robot(i * 0.5 + 0.25, x * 0.5 + 0.25));
+                        }
+                        if ("RED".equals(team) && c == 'B') {
+                            robots.add(new Robot(i * 0.5 + 0.25, x * 0.5 + 0.25));
+                        }
+                    }
                     else if ("BLUE".equals(team) && c >= '1' && c <= '9') {
                         Workbench newWB = new Workbench();
                         newWB.setID(Integer.parseInt("" + c));
@@ -346,16 +353,16 @@ public class Main {
                         newWB.setID(Integer.parseInt("" + (c - 'a' + 1)));
                         newWB.setxMap(x);
                         newWB.setyMap(i);
-                        newWB.setX(i * 0.5);
-                        newWB.setY(x * 0.5);
+                        newWB.setX(i * 0.5 + 0.25);
+                        newWB.setY(x * 0.5 + 0.25);
                         enemyWorkbenches.add(newWB);
                     } else if ("RED".equals(team) && c >= '1' && c <= '9') {
                         Workbench newWB = new Workbench();
                         newWB.setID(Integer.parseInt("" + c));
                         newWB.setxMap(x);
                         newWB.setyMap(i);
-                        newWB.setX(i * 0.5);
-                        newWB.setY(x * 0.5);
+                        newWB.setX(i * 0.5 + 0.25);
+                        newWB.setY(x * 0.5 + 0.25);
                         enemyWorkbenches.add(newWB);
                     }
                 }
@@ -366,8 +373,9 @@ public class Main {
     }
 
     private static boolean readUtilOK() throws IOException {
-        int i = 0;
+        int i = 0;  //记录第几个工作台
         int j = 0; //用来遍历robots数组，存雷达信息
+        int k = 0;  //记录第几个机器人
         String line;
         while ((line = inStream.readLine()) != null) {
             if ("OK".equals(line)) {
@@ -388,11 +396,15 @@ public class Main {
                 workbench.setProduct_status(Integer.parseInt(s[5]));
                 i++;
             } else if (s.length == 10) {
-                Robot robot = new Robot(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Double.parseDouble(s[2]),
+                Robot robot = robots.get(k);
+                robot.robotUpdate(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Double.parseDouble(s[2]),
                         Double.parseDouble(s[3]), Double.parseDouble(s[4]), Double.parseDouble(s[5]),
                         Double.parseDouble(s[6]), Double.parseDouble(s[7]), Double.parseDouble(s[8]),
                         Double.parseDouble(s[9]));
-                robots.add(robot);
+                robot.setBuy(false);
+                robot.setSell(false);
+                robot.setDestroy(false);
+                k++;
             } else if (s.length == 360) {
                 double[] doubles = Arrays.asList(s).stream().mapToDouble(Double::parseDouble).toArray();
                 robots.get(j).setRadar(doubles);

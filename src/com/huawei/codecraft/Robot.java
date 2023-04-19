@@ -15,7 +15,24 @@ public class Robot {
     private double y;
     private double[] radar;
 
+    public Robot(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
     public Robot(int workStationID, int goodID, double timeCoef, double collideCoef, double rotate, double lineSpend_x, double lineSpend_y, double intendAngle, double x, double y) {
+        this.workStationID = workStationID;
+        this.goodID = goodID;
+        this.timeCoef = timeCoef;
+        this.collideCoef = collideCoef;
+        this.rotate = rotate;
+        this.lineSpend_x = lineSpend_x;
+        this.lineSpend_y = lineSpend_y;
+        this.intendAngle = intendAngle;
+        this.x = x;
+        this.y = y;
+    }
+
+    public void robotUpdate(int workStationID, int goodID, double timeCoef, double collideCoef, double rotate, double lineSpend_x, double lineSpend_y, double intendAngle, double x, double y) {
         this.workStationID = workStationID;
         this.goodID = goodID;
         this.timeCoef = timeCoef;
