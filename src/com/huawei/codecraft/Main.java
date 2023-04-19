@@ -16,6 +16,7 @@ public class Main {
     public static ThreadLocal<Integer> who = new ThreadLocal<>();
     private static dispatchingCenter dc = new dispatchingCenter();
     private static ArrayList<Workbench> workbenches = new ArrayList<>();
+    public static ArrayList<Workbench> enemyWorkbenches = new ArrayList<>();
     public static ArrayList<Robot> robots = new ArrayList<>();
     private static List<List<int[]>> robotsPath = new ArrayList<>();
     private static int[][] map;
@@ -340,6 +341,22 @@ public class Main {
                         workbenches.add(newWB);
                         map[x][i] = workbenches.size() - 1;
                         WBList.add(Integer.parseInt("" + (c - 'a' + 1)));
+                    } else if ("BLUE".equals(team) && c >= 'a' && c <= 'i') {
+                        Workbench newWB = new Workbench();
+                        newWB.setID(Integer.parseInt("" + (c - 'a' + 1)));
+                        newWB.setxMap(x);
+                        newWB.setyMap(i);
+                        newWB.setX(i * 0.5);
+                        newWB.setY(x * 0.5);
+                        enemyWorkbenches.add(newWB);
+                    } else if ("RED".equals(team) && c >= '1' && c <= '9') {
+                        Workbench newWB = new Workbench();
+                        newWB.setID(Integer.parseInt("" + c));
+                        newWB.setxMap(x);
+                        newWB.setyMap(i);
+                        newWB.setX(i * 0.5);
+                        newWB.setY(x * 0.5);
+                        enemyWorkbenches.add(newWB);
                     }
                 }
                 x--;
