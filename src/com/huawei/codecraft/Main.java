@@ -33,6 +33,7 @@ public class Main {
     private static ArrayList<Workbench> dead_Workbench = new ArrayList<>();
     //记录一个工作台死了多少秒
     private static Map<Workbench, Integer> dead_time_wb = new HashMap<>();
+    private static Map<Workbench, Integer> alive_time_wb = new HashMap<>();
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -160,6 +161,28 @@ public class Main {
             for (int robotId = 0; robotId < 4; robotId++) {
                 Robot robot = robots.get(robotId);
                 if(robot.isDestroy())   builder.append("destroy").append(' ').append(robotId).append('\n');
+            }
+
+            //如果一个工作台在10s(500帧)内都没有机器人在上面，那就让他复活
+            if (team.equals("RED")) {
+                Iterator<Workbench> iterator = dead_Workbench.iterator();
+                while (iterator.hasNext()) {
+                    Workbench workbench = iterator.next();
+                    if (workbench.isEnemyNotOn) {
+                        Integer aliveTime = alive_time_wb.getOrDefault(workbench, 0);
+                        if (aliveTime > 500) {
+                            workbench.setAlive(true);
+                            iterator.remove();
+                        } else {
+                            alive_time_wb.put(workbench, aliveTime + 1);
+                        }
+                    } else {
+                        //归零
+                        if (alive_time_wb.keySet().contains(workbench)) {
+                            alive_time_wb.remove(workbench);
+                        }
+                    }
+                }
             }
 
             //要将刚才弄死的工作台还原一下
