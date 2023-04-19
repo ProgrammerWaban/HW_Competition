@@ -18,6 +18,7 @@ public class Main {
     private static ArrayList<Workbench> workbenches = new ArrayList<>();
     public static ArrayList<Workbench> enemyWorkbenches = new ArrayList<>();
     public static ArrayList<Robot> robots = new ArrayList<>();
+    public static ArrayList<Integer> robotsToAttack = new ArrayList<>();
     private static List<List<int[]>> robotsPath = new ArrayList<>();
     private static int[][] map;
 
@@ -92,6 +93,20 @@ public class Main {
                 if(map[wbNewX][wbNewY] == -1)   n++;
             }
             if(n >= 2)  wb.setAlive(false);
+        }
+        //判断机器人有无能去的工作台，决定是否去进攻
+        for (int i = 0; i < robots.size(); i++) {
+            Robot robot = robots.get(i);
+            boolean canWork = false;
+            for (Workbench wb : workbenches) {
+                if (wb.getDistMatWithNoGood()[robot.getMatXY()[0]][robot.getMatXY()[1]] != Double.MAX_VALUE) {
+                    canWork = true;
+                    break;
+                }
+            }
+            if(!canWork){
+                robotsToAttack.add(i);
+            }
         }
         //初始化结束
         outStream.print("OK\n");
