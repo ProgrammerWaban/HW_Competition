@@ -304,7 +304,7 @@ public class Robot {
         } else {
             if (!isTeammate(robots, mapIndex0, mapIndex1) && isTrueEnemyRobot(radar_index)) {
                 map_clone[mapIndex0][mapIndex1] = -1;
-                System.err.println("前方有机器人，更改地图");
+                //System.err.println("前方有机器人，更改地图");
                 //return true;   //表示遍历到的是机器人（对面方的）
             }
             //return false; //对于友方机器人不做处理，直接忽略

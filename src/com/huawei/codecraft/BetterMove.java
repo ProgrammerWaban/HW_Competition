@@ -229,7 +229,7 @@ public class BetterMove {
             }
             //如果是个正方形的四个点就需要特殊处理
             if (path.size() > 4 && isSquare(path)) {
-                System.err.println("=======");
+                //System.err.println("=======");
                 ints = path.get(4);
             }
             //根据目标点是否靠墙判断走哪一根线
