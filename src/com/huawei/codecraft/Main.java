@@ -300,6 +300,17 @@ public class Main {
                         stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
                     double[][] distMat = enemyWB.getDistMatWithGood();
                     int hasGood = 1;
+                    //如果不可达就换成无商品
+                    if(distMat[startXY[0]][startXY[1]] == Double.MAX_VALUE){
+                        distMat = enemyWB.getDistMatWithNoGood();
+                        hasGood = 0;
+                        //还是不可达的话，就
+                        if(distMat[startXY[0]][startXY[1]] == Double.MAX_VALUE){
+                            //if(robotsToAttack.contains(robotId))    robotsToAttack.remove(Integer.valueOf(robotId));
+                            robotsPath.add(new ArrayList<>());
+                            continue;
+                        }
+                    }
                     List<int[]> path;
                     if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
                         path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
@@ -349,6 +360,9 @@ public class Main {
                     }else{
                         BetterMove.adjustMovementJump(wb, robot);
                     }
+                }else{
+                    robot.setWantRotate(Math.PI);
+                    robot.setWantForward(0);
                 }
                 //靠经墙壁减速(其实这里也可以设置成只有红方才执行)
                 //BetterMove.closeToWall_slowDown(map_clone, robot, 1.8);
