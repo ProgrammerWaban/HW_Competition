@@ -164,10 +164,22 @@ public class Main {
             for (int i = 0; i < map.length; i++) {
                 map_clone[i] = map[i].clone();
             }
-            //改变map_clone
+            //改变map_clone,顺便存储机器人到地方机器人的距离及点位
             if (team.equals("RED")) {
-                for (Robot robot : robots) {
-                    robot.radarCheck(map_clone, map, robots);
+                for (int i = 0; i < robots.size(); i++) {
+                    Robot robot = robots.get(i);
+                    robot.radarCheck(map_clone, map, robots, i);
+                }
+            } else {
+                for (int i = 0; i < robots.size(); i++) {
+                    //蓝方机器人遍历前得先初始化下AttackStrategy的参数
+                    if (i == 0) {
+                        AttackStrategy.toEnemyRobotDistance.clear();
+                    }
+                    AttackStrategy.tmp_distance = Double.MAX_VALUE;
+
+                    Robot robot = robots.get(i);
+                    robot.radarCheck(map_clone, map, robots, i);
                 }
             }
 
@@ -284,10 +296,19 @@ public class Main {
                     double[][] distMat = robot.getGoodID() == 0 ? wb.getDistMatWithNoGood() : wb.getDistMatWithGood();
                     int hasGood = robot.getGoodID() == 0 ? 0 : 1;
                     List<int[]> path;
-                    if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
-                        path = SearchAlgorithm.astar(startXY, stopXY, map_clone, distMat, hasGood);
-                    else
-                        path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+                    if (SafePlace[robotId][0] == -1 && SafePlace[robotId][1] == -1) {
+                        if (team.equals("BLUE")) {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
+                        } else {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map_clone, distMat, hasGood);
+                        }
+                    } else {
+                        if (team.equals("BLUE")) {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                        } else {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+                        }
+                    }
                     Collections.reverse(path);
                     robotsPath.add(path);
                 }
@@ -314,10 +335,19 @@ public class Main {
                         }
                     }
                     List<int[]> path;
-                    if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
-                        path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
-                    else
-                        path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                    if (SafePlace[robotId][0] == -1 && SafePlace[robotId][1] == -1) {
+                        if (team.equals("BLUE")) {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
+                        } else {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map_clone, distMat, hasGood);
+                        }
+                    } else {
+                        if (team.equals("BLUE")) {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                        } else {
+                            path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+                        }
+                    }
                     Collections.reverse(path);
                     robotsPath.add(path);
                 }
@@ -349,11 +379,19 @@ public class Main {
                             BetterMove.adjustMovement(wb, robot);
                             continue;
                         }
-                        if(attackDestinationID > -1){
+                        if (attackDestinationID > -1) {
                             //这里放置撞敌人
-                            robot.setWantRotate(Math.PI);
-                            robot.setWantForward(0);
-                            continue;
+                            //这里用以计算蓝方机器人是否进行冲撞
+                            if (team.equals("BLUE")) {
+                                int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                                if (stopXY_tmp != null) {
+                                    robot.setFramesOfStay(0);
+                                    wb.setX(stopXY_tmp[1]*0.5+0.25);
+                                    wb.setY(stopXY_tmp[0]*0.5+0.25);
+                                    BetterMove.adjustMovementJump(wb, robot);
+                                    continue;
+                                }
+                            }
                         }
                     }
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
