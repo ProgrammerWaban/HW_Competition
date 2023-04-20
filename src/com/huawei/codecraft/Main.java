@@ -392,6 +392,9 @@ public class Main {
                                     continue;
                                 }
                             }
+                            else {
+                                continue;
+                            }
                         }
                     }
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
