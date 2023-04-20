@@ -1,6 +1,7 @@
 package com.huawei.codecraft;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Robot {
     private int workStationID;
@@ -19,6 +20,7 @@ public class Robot {
         this.x = x;
         this.y = y;
     }
+
     public Robot(int workStationID, int goodID, double timeCoef, double collideCoef, double rotate, double lineSpend_x, double lineSpend_y, double intendAngle, double x, double y) {
         this.workStationID = workStationID;
         this.goodID = goodID;
@@ -300,18 +302,19 @@ public class Robot {
 
     //记录逗留时间
     private int framesOfStay = 0;
+
     //检查是否到达进攻点
-    public void checkReachAttackDestination(dispatchingCenter dc, int robotID, ArrayList<Workbench> enemyWorkbenches){
+    public void checkReachAttackDestination(dispatchingCenter dc, int robotID, ArrayList<Workbench> enemyWorkbenches) {
         //攻击目的地
         int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotID);
         //攻击next目的地
         int attackNextDestinationID = dc.findAttackNextDestinationIDByRobotID(robotID);
 
-        if(attackDestinationID == -1 && attackNextDestinationID == -1)  return;
+        if (attackDestinationID == -1 && attackNextDestinationID == -1) return;
 
         Workbench enemyWB = enemyWorkbenches.get(attackDestinationID);
         //机器人到达攻击目的地
-        if(Tool.calDistanceByXY(x, y, enemyWB.getX(), enemyWB.getY()) < 0.5){
+        if (Tool.calDistanceByXY(x, y, enemyWB.getX(), enemyWB.getY()) < 0.5) {
             if (framesOfStay > 500) {
                 //逗留够久了，去下一个攻击点
                 dc.changeRobotAttackDestinationIDByRobotID(robotID, attackNextDestinationID);
@@ -324,17 +327,17 @@ public class Robot {
     }
 
     //根据激光雷达来更新地图（只取机器人朝向的扇形区域（40度））
-    public void radarCheck(int[][] map_clone, int[][] map, ArrayList<Robot> robots) {
+    public void radarCheck(int[][] map_clone, int[][] map, ArrayList<Robot> robots, int robotID) {
 
         for (int i = 0; i < 360; i++) {
             double angle_willAdd = Math.toRadians(i);
-            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle + angle_willAdd, i);
+            singleLineOfRadarIsRobot(map_clone, map, robots, intendAngle + angle_willAdd, i, robotID);
         }
 
     }
 
     //用于判断在一条线上是否有障碍物，进而来更新地图
-    private void singleLineOfRadarIsRobot(int[][] map_clone, int[][] map, ArrayList<Robot> robots, double theta, int radar_index) {
+    private void singleLineOfRadarIsRobot(int[][] map_clone, int[][] map, ArrayList<Robot> robots, double theta, int radar_index, int robotID) {
         double x_add = x + (radar[radar_index] + 0.0001) * Math.cos(theta);
         double y_add = y + (radar[radar_index] + 0.0001) * Math.sin(theta);
         int mapIndex0 = (int) (y_add / 0.5);
@@ -346,6 +349,12 @@ public class Robot {
         } else {
             if (!isTeammate(robots, mapIndex0, mapIndex1) && isTrueEnemyRobot(radar_index, theta, map, robots)) {
                 map_clone[mapIndex0][mapIndex1] = -1;
+
+                //用来存储用于对抗的信息(只存那个距离最短的)
+                if (radar[radar_index] < AttackStrategy.tmp_distance) {
+                    AttackStrategy.toEnemyRobotDistance.put(robotID, Arrays.asList(mapIndex0 * 1.0, mapIndex1 * 1.0, radar[radar_index]));
+                    AttackStrategy.tmp_distance = radar[radar_index];
+                }
                 //System.err.println("前方有机器人，更改地图");
                 //return true;   //表示遍历到的是机器人（对面方的）
             }
