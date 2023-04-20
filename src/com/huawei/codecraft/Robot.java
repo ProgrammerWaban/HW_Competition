@@ -350,10 +350,12 @@ public class Robot {
             if (!isTeammate(robots, mapIndex0, mapIndex1) && isTrueEnemyRobot(radar_index, theta, map, robots)) {
                 map_clone[mapIndex0][mapIndex1] = -1;
 
-                //用来存储用于对抗的信息(只存那个距离最短的)
-                if (radar[radar_index] < AttackStrategy.tmp_distance) {
-                    AttackStrategy.toEnemyRobotDistance.put(robotID, Arrays.asList(mapIndex0 * 1.0, mapIndex1 * 1.0, radar[radar_index]));
-                    AttackStrategy.tmp_distance = radar[radar_index];
+                //用来存储用于对抗的信息(只存那个距离最短的)————只对蓝方有效
+                if(Main.team.equals("BLUE")) {
+                    if (radar[radar_index] < AttackStrategy.tmp_distance) {
+                        AttackStrategy.toEnemyRobotDistance.put(robotID, Arrays.asList(mapIndex0 * 1.0, mapIndex1 * 1.0, radar[radar_index]));
+                        AttackStrategy.tmp_distance = radar[radar_index];
+                    }
                 }
                 //System.err.println("前方有机器人，更改地图");
                 //return true;   //表示遍历到的是机器人（对面方的）
