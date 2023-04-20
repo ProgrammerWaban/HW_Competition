@@ -140,8 +140,8 @@ public class dispatchingCenter {
             if(robotsDestinationID[robotId] == -1 && robotsNextDestinationID[robotId] == -1){
                 //如果有商品，但是目的地和next目的地都为-1，那么就是工作台都死了
                 if(robots.get(robotId).getGoodID() != 0){
-                    //这个时候，超过10秒还是卖不了就销毁
-                    if(framesOfNoWayToSellWithGoods[robotId] > 500){
+                    //这个时候，超过15秒还是卖不了就销毁
+                    if(framesOfNoWayToSellWithGoods[robotId] > 750){
                         robots.get(robotId).setDestroy(true);
                     }
                     else{
