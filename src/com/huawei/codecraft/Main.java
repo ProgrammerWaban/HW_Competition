@@ -361,7 +361,7 @@ public class Main {
                         BetterMove.adjustMovementJump(wb, robot);
                     }
                 }else{
-                    robot.setWantRotate(Math.PI);
+                    robot.setWantRotate(0);
                     robot.setWantForward(0);
                 }
                 //靠经墙壁减速(其实这里也可以设置成只有红方才执行)
