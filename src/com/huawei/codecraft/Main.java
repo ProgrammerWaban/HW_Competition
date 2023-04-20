@@ -242,15 +242,6 @@ public class Main {
                 }
             }
 
-            //要将刚才弄死的工作台还原一下
-            if (team.equals("RED")) {
-                for (Workbench onWorkbench : standOnWorkbench) {
-                    onWorkbench.isEnemyNotOn = true;
-                    //onWorkbench.setAlive(true);
-
-                }
-            }
-
             //计算 机器人的路线
             for (int robotId = 0; robotId < 4; robotId++) {
 
@@ -430,6 +421,15 @@ public class Main {
             }
 
             robotsPath.clear();
+
+            //要将刚才弄死的工作台还原一下
+            if (team.equals("RED")) {
+                for (Workbench onWorkbench : standOnWorkbench) {
+                    onWorkbench.isEnemyNotOn = true;
+                    //onWorkbench.setAlive(true);
+
+                }
+            }
 
             builder.append("OK").append('\n');
             outStream.print(builder);
