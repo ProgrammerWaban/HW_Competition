@@ -303,6 +303,14 @@ public class Robot {
     //记录逗留时间
     private int framesOfStay = 0;
 
+    public int getFramesOfStay() {
+        return framesOfStay;
+    }
+
+    public void setFramesOfStay(int framesOfStay) {
+        this.framesOfStay = framesOfStay;
+    }
+
     //检查是否到达进攻点
     public void checkReachAttackDestination(dispatchingCenter dc, int robotID, ArrayList<Workbench> enemyWorkbenches) {
         //攻击目的地
