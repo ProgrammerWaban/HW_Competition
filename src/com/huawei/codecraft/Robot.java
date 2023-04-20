@@ -298,6 +298,31 @@ public class Robot {
         }
     }
 
+    //记录逗留时间
+    private int framesOfStay = 0;
+    //检查是否到达进攻点
+    public void checkReachAttackDestination(dispatchingCenter dc, int robotID, ArrayList<Workbench> enemyWorkbenches){
+        //攻击目的地
+        int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotID);
+        //攻击next目的地
+        int attackNextDestinationID = dc.findAttackNextDestinationIDByRobotID(robotID);
+
+        if(attackDestinationID == -1 && attackNextDestinationID == -1)  return;
+
+        Workbench enemyWB = enemyWorkbenches.get(attackDestinationID);
+        //机器人到达攻击目的地
+        if(Tool.calDistanceByXY(x, y, enemyWB.getX(), enemyWB.getY()) < 0.5){
+            if (framesOfStay > 500) {
+                //逗留够久了，去下一个攻击点
+                dc.changeRobotAttackDestinationIDByRobotID(robotID, attackNextDestinationID);
+                dc.changeRobotAttackNextDestinationIDByRobotID(robotID, -1);
+                framesOfStay = 0;
+            } else {
+                framesOfStay++;
+            }
+        }
+    }
+
     //根据激光雷达来更新地图（只取机器人朝向的扇形区域（40度））
     public void radarCheck(int[][] map_clone, int[][] map, ArrayList<Robot> robots) {
 

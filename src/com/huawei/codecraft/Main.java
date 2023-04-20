@@ -109,6 +109,7 @@ public class Main {
                 robotsToAttack.add(i);
             }
         }
+        //robotsToAttack.add(3);
         //为每个敌方工作台计算到各个点的距离
         for (Workbench wb : enemyWorkbenches){
             double[][] distMatWithNoGood = new double[100][100];
@@ -151,6 +152,9 @@ public class Main {
                 //进行卖行为
                 if (robot.isSell()) builder.append("sell").append(' ').append(robotId).append('\n');
                 if (robot.isBuy())  builder.append("buy").append(' ').append(robotId).append('\n');
+
+                //检查是否到达攻击地点
+                robot.checkReachAttackDestination(dc, robotId, enemyWorkbenches);
             }
 
             //进行地图深克隆
@@ -256,8 +260,13 @@ public class Main {
                 Robot robot = robots.get(robotId);
                 int destinationID = dc.findDestinationIDByRobotID(robotId);
                 Workbench wb = destinationID == -1 ? null : workbenches.get(destinationID);
-                if(wb == null)  robotsPath.add(new ArrayList<>());
-                else{
+                int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotId);
+                Workbench enemyWB = attackDestinationID == -1 ? null : enemyWorkbenches.get(attackDestinationID);
+                if(wb == null && enemyWB == null){
+                    robotsPath.add(new ArrayList<>());
+                }
+                //工作路线
+                if(wb != null && enemyWB == null){
                     int[] startXY = robot.getMatXY();
                     robot.changeMapXY(map, startXY);
                     int[] stopXY;
@@ -280,6 +289,25 @@ public class Main {
                     Collections.reverse(path);
                     robotsPath.add(path);
                 }
+                //攻击路线
+                if(wb == null && enemyWB != null){
+                    int[] startXY = robot.getMatXY();
+                    robot.changeMapXY(map, startXY);
+                    int[] stopXY;
+                    if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
+                        stopXY = new int[]{enemyWB.getxMap(), enemyWB.getyMap()};
+                    else
+                        stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
+                    double[][] distMat = enemyWB.getDistMatWithGood();
+                    int hasGood = 1;
+                    List<int[]> path;
+                    if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
+                        path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
+                    else
+                        path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                    Collections.reverse(path);
+                    robotsPath.add(path);
+                }
             }
 
             //打印输出地图和路径
@@ -297,14 +325,23 @@ public class Main {
             for (int robotId = 0; robotId < 4; robotId++) {
                 Robot robot = robots.get(robotId);
                 int destinationID = dc.findDestinationIDByRobotID(robotId);
+                int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotId);
                 Workbench wb = new Workbench();
-                if(destinationID > -1){
+                if(destinationID > -1 || attackDestinationID > -1){
                     List<int[]> path = robotsPath.get(robotId);
                     if (path.size() == 0 || path.size() == 1) {
-                        //防止原地抽搐
-                        wb = workbenches.get(destinationID);
-                        BetterMove.adjustMovement(wb, robot);
-                        continue;
+                        if(destinationID > -1){
+                            //防止原地抽搐
+                            wb = workbenches.get(destinationID);
+                            BetterMove.adjustMovement(wb, robot);
+                            continue;
+                        }
+                        if(attackDestinationID > -1){
+                            //这里放置撞敌人
+                            robot.setWantRotate(Math.PI);
+                            robot.setWantForward(0);
+                            continue;
+                        }
                     }
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
                     if(jump == 0){

@@ -56,6 +56,26 @@ public class dispatchingCenter {
         robotsNextDestinationID[robotID] = destinationID;
     }
 
+    //根据robot的编号找自己的攻击目的工作台ID
+    public int findAttackDestinationIDByRobotID(int robotID) {
+        return attackDestinationID[robotID];
+    }
+
+    //根据robot的编号找自己的攻击next目的工作台ID
+    public int findAttackNextDestinationIDByRobotID(int robotID) {
+        return attackNextDestinationID[robotID];
+    }
+
+    //修改robot的攻击目的工作台的ID
+    public void changeRobotAttackDestinationIDByRobotID(int robotID, int destinationID) {
+        attackDestinationID[robotID] = destinationID;
+    }
+
+    //修改robot的攻击next目的工作台的ID
+    public void changeRobotAttackNextDestinationIDByRobotID(int robotID, int destinationID) {
+        attackNextDestinationID[robotID] = destinationID;
+    }
+
     //根据商品ID获取所有工作台列表
     public List<Integer> getWBListByGoodID(int goodID){
         return mapWB.get(goodID);
@@ -113,6 +133,9 @@ public class dispatchingCenter {
         List<Integer> robotsToBuySell = new ArrayList<>();
         List<Integer> robotsToSell = new ArrayList<>();
         for (int robotId = 0; robotId < 4; robotId++) {
+            //如果是进攻就跳过
+            if(Main.robotsToAttack.contains(robotId))   continue;
+
             //无目的地  放入robotsToBuySell
             if(robotsDestinationID[robotId] == -1 && robotsNextDestinationID[robotId] == -1){
                 //如果有商品，但是目的地和next目的地都为-1，那么就是工作台都死了
@@ -840,6 +863,7 @@ public class dispatchingCenter {
             if (toAttack) {
                 if (attackDestinationID[i] == -1 && attackNextDestinationID[i] == -1) {
                     robotsToAttack.add(i);
+                    //robotIdToAttack.add(i);
                 }
             }
         }
@@ -856,6 +880,7 @@ public class dispatchingCenter {
             //Robot robot = robots.get(id);
             int r = (int)(Math.random() * 10) % 5;
             attackDestinationID[id] = best45670[r];
+            if(attackDestinationID[id] == -1)   attackDestinationID[id] = best45670[3];
             attackNextDestinationID[id] = best45670[3];
         }
     }
@@ -876,19 +901,19 @@ public class dispatchingCenter {
                 int id0 = -1;
                 for (Workbench wb1 : enemyWorkbenchs){
                     if (wb1.getID() == 4) {
-                        dist4 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist4);
+                        dist4 = Math.min(wb.getDistMatWithGood()[wb1.getxMap()][wb1.getyMap()], dist4);
                         id4 = enemyWorkbenchs.indexOf(wb1);
                     }
                     if (wb1.getID() == 5) {
-                        dist5 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist5);
+                        dist5 = Math.min(wb.getDistMatWithGood()[wb1.getxMap()][wb1.getyMap()], dist5);
                         id5 = enemyWorkbenchs.indexOf(wb1);
                     }
                     if (wb1.getID() == 6) {
-                        dist6 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist6);
+                        dist6 = Math.min(wb.getDistMatWithGood()[wb1.getxMap()][wb1.getyMap()], dist6);
                         id6 = enemyWorkbenchs.indexOf(wb1);
                     }
                     if (wb1.getID() == 8 || wb1.getID() == 9) {
-                        dist0 = Math.min(wb.getDistMatWithNoGood()[wb1.getxMap()][wb1.getyMap()], dist0);
+                        dist0 = Math.min(wb.getDistMatWithGood()[wb1.getxMap()][wb1.getyMap()], dist0);
                         id0 = enemyWorkbenchs.indexOf(wb1);
                     }
                 }
