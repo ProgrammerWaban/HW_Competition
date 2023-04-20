@@ -109,7 +109,9 @@ public class Main {
                 robotsToAttack.add(i);
             }
         }
-        //robotsToAttack.add(3);
+        if("BLUE".equals(team) && robotsToAttack.size() == 0){
+            robotsToAttack.add(3);
+        }
         //为每个敌方工作台计算到各个点的距离
         for (Workbench wb : enemyWorkbenches){
             double[][] distMatWithNoGood = new double[100][100];
