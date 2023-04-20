@@ -464,7 +464,7 @@ public class dispatchingCenter {
             //买-工作台
             Workbench wb = workbenches.get(i);
             //有产品 && 没被预定   也就是能买
-            if(wb.getProduct_status() == 1 && !setWBX.contains(i)){
+            if(wb.getProduct_status() == 1 && !setWBX.contains(i) && wb.isAlive()){
                 //需要该商品的工作台-需要该商品的被预定的工作台=需要该商品的没被预定的工作台
                 List<Integer> list = Tool.calDifferenceWithABList(getWBListByGoodID(wb.getID()), getWBXListByGoodID(wb.getID()));
                 for(Integer l : list){
@@ -554,7 +554,7 @@ public class dispatchingCenter {
                 //买-工作台
                 Workbench wb = workbenches.get(i);
                 //有产品 && 没被预定   也就是能买
-                if(wb.getProduct_status() == 1 && (!setWBX.contains(i) || skip.contains(wb.getID()))){
+                if(wb.getProduct_status() == 1 && (!setWBX.contains(i) || skip.contains(wb.getID())) && wb.isAlive()){
                     //需要该商品的工作台-需要该商品的被预定的工作台=需要该商品的没被预定的工作台
                     List<Integer> list = Tool.calDifferenceWithABList(getWBListByGoodID(wb.getID()), getWBXListByGoodID(wb.getID()));
                     for(Integer l : list){
