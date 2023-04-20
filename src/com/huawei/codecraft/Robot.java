@@ -344,7 +344,7 @@ public class Robot {
         if (isBarrierAround(mapIndex0, mapIndex1, map)) {
             //return false; // 表示雷达遍历到的是原生障碍物墙,不做处理
         } else {
-            if (!isTeammate(robots, mapIndex0, mapIndex1) && isTrueEnemyRobot(radar_index)) {
+            if (!isTeammate(robots, mapIndex0, mapIndex1) && isTrueEnemyRobot(radar_index, theta, map, robots)) {
                 map_clone[mapIndex0][mapIndex1] = -1;
                 //System.err.println("前方有机器人，更改地图");
                 //return true;   //表示遍历到的是机器人（对面方的）
@@ -354,19 +354,32 @@ public class Robot {
     }
 
     //滑动3个窗口，用来检测激光照到的是不是真的机器人(如果距离远就用2根线，以20为分界线)
-    private boolean isTrueEnemyRobot(int radar_index) {
+    //这里必须让三条激光都判定目的地为机器人而不是真实障碍物
+    private boolean isTrueEnemyRobot(int radar_index, double theta, int[][] map, ArrayList<Robot> robots) {
         double distance = radar[radar_index];
 
-        if(distance<20) {
+        if (distance < 20) {
             for (int j = 0; j < 2; j++) {
-                if (radar[(radar_index + 1 + j) % 360] > distance + 0.2 || radar[(radar_index + 1 + j) % 360] < distance - 0.2) {
+                theta = (theta + Math.toRadians(1)) % (2 * Math.PI);
+                double x_add = x + (radar[(radar_index + 1 + j) % 360] + 0.0001) * Math.cos(theta);
+                double y_add = y + (radar[(radar_index + 1 + j) % 360] + 0.0001) * Math.sin(theta);
+                int mapIndex0 = (int) (y_add / 0.5);
+                int mapIndex1 = (int) (x_add / 0.5);
+                if (isBarrierAround(mapIndex0, mapIndex1, map) ||
+                        radar[(radar_index + 1 + j) % 360] > distance + 0.1 || radar[(radar_index + 1 + j) % 360] < distance - 0.1) {
                     return false;
                 }
             }
             return true;
-        }else{
+        } else {
             for (int j = 0; j < 1; j++) {
-                if (radar[(radar_index + 1 + j) % 360] > distance + 0.2 || radar[(radar_index + 1 + j) % 360] < distance - 0.2) {
+                theta = (theta + Math.toRadians(1)) % (2 * Math.PI);
+                double x_add = x + (radar[(radar_index + 1 + j) % 360] + 0.0001) * Math.cos(theta);
+                double y_add = y + (radar[(radar_index + 1 + j) % 360] + 0.0001) * Math.sin(theta);
+                int mapIndex0 = (int) (y_add / 0.5);
+                int mapIndex1 = (int) (x_add / 0.5);
+                if (isBarrierAround(mapIndex0, mapIndex1, map) ||
+                        radar[(radar_index + 1 + j) % 360] > distance + 0.1 || radar[(radar_index + 1 + j) % 360] < distance - 0.1) {
                     return false;
                 }
             }
@@ -384,7 +397,7 @@ public class Robot {
             if (robot.getX() == x && robot.getY() == y) {
                 continue;
             }
-            if(robot.goodID==0) {
+            if (robot.goodID == 0 && !robot.isSell()) {
                 for (int i = 0; i < direction_nogood.length; i++) {
                     int tmp_x = robot.getMatXY()[0] + direction_nogood[i][0];
                     int tmp_y = robot.getMatXY()[1] + direction_nogood[i][1];
@@ -393,7 +406,7 @@ public class Robot {
                         return true;  //表示想更新障碍物的地方周围存在友军
                     }
                 }
-            }else{
+            } else {
                 for (int i = 0; i < direction_hasgood.length; i++) {
                     int tmp_x = robot.getMatXY()[0] + direction_hasgood[i][0];
                     int tmp_y = robot.getMatXY()[1] + direction_hasgood[i][1];
@@ -414,6 +427,7 @@ public class Robot {
         for (int i = 0; i < direction.length; i++) {
             int tmp_x = nowY + direction[i][0];
             int tmp_y = nowX + direction[i][1];
+            if (tmp_x < 0 || tmp_y < 0 || tmp_x > 99 || tmp_y > 99) return true;  //把边界也当成障碍物（有待商榷）
             if (tmp_y == getMatXY()[1] && tmp_x == getMatXY()[0]) continue;  //如果遍历到了自己当然直接pass
             if (map[tmp_x][tmp_y] == -1) return true;
         }
