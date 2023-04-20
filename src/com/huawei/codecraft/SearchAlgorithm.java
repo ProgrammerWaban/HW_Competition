@@ -1,9 +1,6 @@
 package com.huawei.codecraft;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class SearchAlgorithm {
     private final static int[][] direction = new int[][]{{1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
@@ -132,6 +129,105 @@ public class SearchAlgorithm {
                     //如果贴墙，距离加2
                     if(isCloseWall(newX, newY, map))    f += 12;
                     pq.offer(new double[]{newX, newY, f});
+                }
+            }
+        }
+
+        return path;
+    }
+
+    public static List<int[]> astar(int[] start, int[] stop, int[][] map, double[][] distMat, int hasGood, List<int[]> dynamicObs, List<int[]> semiDynamicObs){
+        List<int[]> path = new ArrayList<>();
+
+        //初始化
+        pq = new PriorityQueue<>(Comparator.comparingDouble(o -> o[2]));
+        gMatrix = new double[map.length][map[0].length];
+        parent = new int[map.length][map[0].length][2];
+        int[][] newMap = new int[map.length][map[0].length];
+        for(int i = 0; i < map.length; i++){
+            for(int j = 0; j < map[0].length; j++){
+                gMatrix[i][j] = Double.MAX_VALUE;
+                parent[i][j][0] = -1;
+                parent[i][j][1] = -1;
+                newMap[i][j] = map[i][j];
+            }
+        }
+        //记录动态障碍
+        HashMap<Integer, List<int[]>> hm = new HashMap<>();
+        for(int[] obs : dynamicObs){
+            List<int[]> obsList = hm.getOrDefault(obs[0], new ArrayList<>());
+            obsList.add(obs);
+            hm.put(obs[0], obsList);
+        }
+        for(int[] obs : semiDynamicObs){
+            List<int[]> obsList = hm.getOrDefault(obs[0], new ArrayList<>());
+            obsList.add(obs);
+            hm.put(obs[0], obsList);
+        }
+        //起点
+        double[] startNode = new double[]{start[0], start[1], 0, 0};
+        pq.offer(startNode);
+        gMatrix[start[0]][start[1]] = 0;
+        parent[start[0]][start[1]][0] = start[0];
+        parent[start[0]][start[1]][1] = start[1];
+
+        //开始遍历
+        while (!pq.isEmpty()){
+            double[] now = pq.poll();
+            int nowX = (int)now[0];
+            int nowY = (int)now[1];
+            int time = (int)now[3];
+
+            //判断是否到终点
+            if(nowX == stop[0] && nowY == stop[1]){
+                int m = stop[0];
+                int n = stop[1];
+                path.add(new int[]{m, n});
+                while(m != start[0] || n != start[1]){
+                    int tempM = parent[m][n][0];
+                    int tempN = parent[m][n][1];
+                    m = tempM;
+                    n = tempN;
+                    path.add(new int[]{m, n});
+                }
+                break;
+            }
+
+            //根据time添加动态障碍物
+            List<int[]> obsList = hm.getOrDefault(time + 1, null);
+            if(obsList != null){
+                for(int[] obs : obsList){
+                    newMap[obs[0]][obs[1]] = -1;
+                }
+            }
+
+            //往8个方向走
+            for(int[] d : direction) {
+                //判断该方向是否可达，不可达就跳过
+                if(!isReachable(nowX, nowY, d, hasGood, newMap))  continue;
+
+                //更新消耗并进优先队列
+                int newX = nowX + d[0];
+                int newY = nowY + d[1];
+                double gCos = d[0] == 0 || d[1] == 0 ? 1 : 1.4;
+                double newCos = gMatrix[nowX][nowY] + gCos;
+                //如果新点的newCos小于之前的cos，就更新
+                if(newCos < gMatrix[newX][newY]){
+                    gMatrix[newX][newY] = newCos;
+                    parent[newX][newY][0] = nowX;
+                    parent[newX][newY][1] = nowY;
+                    //加上h就是astar
+                    double f = newCos + distMat[newX][newY];
+                    //如果贴墙，距离加2
+                    if(isCloseWall(newX, newY, map))    f += 12;
+                    pq.offer(new double[]{newX, newY, f, time + 1});
+                }
+            }
+
+            //删除动态障碍物
+            if(obsList != null){
+                for(int[] obs : obsList){
+                    newMap[obs[0]][obs[1]] = -2;
                 }
             }
         }
