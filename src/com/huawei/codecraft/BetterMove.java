@@ -52,7 +52,7 @@ public class BetterMove {
 
         //先计算夹角，如果夹角小于满足线速度取6的值，则全速前进，角速度根据线速度为6来调整
         //若不满足，将线速度取1，角速度取最大（通过叉乘来判断角速度取正值还是负值）
-        double theta = Math.acos(pointMulti / v / distance); //theta表示线速度和目的地向量的夹角
+        double theta = Math.acos(pointMulti / (v + Double.MIN_VALUE) / distance); //theta表示线速度和目的地向量的夹角
         double intendAngle = robot.getIntendAngle() > 0 ? robot.getIntendAngle() : robot.getIntendAngle() + 2 * Math.PI;
         //表示机器人的单位方向角向量
         double intend_x = Math.cos(intendAngle);
