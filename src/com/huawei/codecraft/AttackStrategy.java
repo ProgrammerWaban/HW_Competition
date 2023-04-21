@@ -13,14 +13,76 @@ public class AttackStrategy {
 
     //蓝方攻击启动函数
     public static int[] blueTeamAttack(int robotID) {
+        avoidMultiAttack();
+
         //上面的数组中已经存了各个机器人对应的共计目标了，此时只需判断距离是否小于一定值就去冲撞目标
         List<Double> list = toEnemyRobotDistance.getOrDefault(robotID, null);
-        //距离小于10的时候才触发冲撞逻辑
+        //距离小于5的时候才触发冲撞逻辑
         if (list != null && list.get(2) < 5) {
             return new int[]{(int) list.get(0).doubleValue(), (int) list.get(1).doubleValue()};
         } else {
             return null;
         }
+    }
+
+    //避免两个机器人同时去撞一个目标
+    public static void avoidMultiAttack() {
+        ArrayList<int[]> enemyRobots = new ArrayList<>();
+        //记录一下每个机器人最近的敌方机器人
+        for (int i = 0; i < 4; i++) {
+            List<Double> list = toEnemyRobotDistance.getOrDefault(i, null);
+            if (list != null) {
+                int[] enemyRobot = new int[]{(int) list.get(0).doubleValue(), (int) list.get(1).doubleValue()};
+                enemyRobots.add(enemyRobot);
+            } else {
+                enemyRobots.add(null);
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            if (toEnemyRobotDistance.containsKey(i)) {
+                int[] tmp_enemyRobot = enemyRobots.get(i);
+                if (tmp_enemyRobot != null) {
+                    boolean flag = false;
+                    for (int j = i + 1; j < 4; j++) {
+                        if (flag) {
+                            continue;
+                        }
+                        int[] otherEnemyRobot = enemyRobots.get(j);
+                        if (isSameEnemyRobot(tmp_enemyRobot, otherEnemyRobot)) {
+                            List<Double> list = toEnemyRobotDistance.get(i);
+                            double tmp_enemyRobotDistance = list.get(2).doubleValue();
+                            list = toEnemyRobotDistance.get(j);
+                            if(list == null){
+                                continue;
+                            }
+                            double otherEnemyRobotDistance = list.get(2).doubleValue();
+                            if (tmp_enemyRobotDistance < otherEnemyRobotDistance) {
+                                toEnemyRobotDistance.remove(j);
+                            } else {
+                                toEnemyRobotDistance.remove(i);
+                                flag = true; //当删掉当前的遍历目标时就不需要往后遍历了
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static boolean isSameEnemyRobot(int[] robotPos1, int[] robotPos2) {
+        if (robotPos1 == null || robotPos2 == null) {
+            return true;
+        }
+        int[][] direction = new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+        for (int i = 0; i < direction.length; i++) {
+            int tmp_0 = robotPos1[0] + direction[i][0];
+            int tmp_1 = robotPos1[1] + direction[i][1];
+            if (tmp_0 == robotPos2[0] && tmp_1 == robotPos2[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
