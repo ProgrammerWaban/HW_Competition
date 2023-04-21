@@ -268,7 +268,22 @@ public class Main {
                 int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotId);
                 Workbench enemyWB = attackDestinationID == -1 ? null : enemyWorkbenches.get(attackDestinationID);
                 if(wb == null && enemyWB == null){
-                    robotsPath.add(new ArrayList<>());
+                    //这里用以计算蓝方机器人是否进行冲撞
+                    if (team.equals("BLUE")) {
+                        int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                        if (stopXY_tmp != null) {
+                            int[] startXY = robot.getMatXY();
+                            robot.changeMapXY(map, startXY);
+                            int[] stopXY = stopXY_tmp;
+                            int hasGood = robot.getGoodID() == 0 ? 0 : 1;
+                            List<int[]> path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                            robotsPath.add(path);
+                        }else{
+                            robotsPath.add(new ArrayList<>());
+                        }
+                    }else{
+                        robotsPath.add(new ArrayList<>());
+                    }
                 }
                 //工作路线
                 if(wb != null && enemyWB == null){
@@ -279,10 +294,22 @@ public class Main {
                         stopXY = new int[]{wb.getxMap(), wb.getyMap()};
                     else
                         stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
+                    //这里用以计算蓝方机器人是否进行冲撞
+                    if (team.equals("BLUE")) {
+                        if (!(robot.getGoodID() == 4 || robot.getGoodID() == 5 || robot.getGoodID() == 6 || robot.getGoodID() == 7)) {
+                            int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                            if (stopXY_tmp != null) {
+                                stopXY = stopXY_tmp;
+                                //System.err.println("追击机器人");
+                            }
+                        }
+                    }
                     //如果终点不可达，就直接返回空路径，不然找遍全地图
-                    if(map_clone[stopXY[0]][stopXY[1]] == -1 || !wb.isEnemyNotOn){
-                        robotsPath.add(new ArrayList<>());
-                        continue;
+                    if (team.equals("RED")){
+                        if(map_clone[stopXY[0]][stopXY[1]] == -1 || !wb.isEnemyNotOn){
+                            robotsPath.add(new ArrayList<>());
+                            continue;
+                        }
                     }
                     double[][] distMat = robot.getGoodID() == 0 ? wb.getDistMatWithNoGood() : wb.getDistMatWithGood();
                     int hasGood = robot.getGoodID() == 0 ? 0 : 1;
@@ -312,6 +339,13 @@ public class Main {
                         stopXY = new int[]{enemyWB.getxMap(), enemyWB.getyMap()};
                     else
                         stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
+                    //这里用以计算蓝方机器人是否进行冲撞
+                    if (team.equals("BLUE")) {
+                        int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                        if (stopXY_tmp != null) {
+                            stopXY = stopXY_tmp;
+                        }
+                    }
                     double[][] distMat = enemyWB.getDistMatWithGood();
                     int hasGood = 1;
                     //如果不可达就换成无商品
