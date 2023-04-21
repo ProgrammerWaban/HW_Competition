@@ -882,13 +882,32 @@ public class dispatchingCenter {
     public void findRoadToAttack(ArrayList<Robot> robots, List<Integer> robotIdToAttack, ArrayList<Workbench> enemyWorkbenchs){
         //找7
         int[] best45670 = Main.enemyWB45670;
+        List<Integer> list = new ArrayList<>();
+        for(int i = 0; i < best45670.length; i++){
+            if(best45670[i] == -1)  continue;
+            if(i < best45670.length - 1){
+                list.add(best45670[i]);
+                list.add(best45670[i]);
+            }else{
+                list.add(best45670[i]);
+            }
+        }
+        //存放已分配的工作台下标
+        List<Integer> l = new ArrayList<>();
+        for(int i = 0; i < 4; i++){
+            l.add(attackDestinationID[i]);
+        }
         //随机分配任务
         for (Integer id : robotIdToAttack){
             //Robot robot = robots.get(id);
-            int r = (int)(Math.random() * 10) % 5;
-            attackDestinationID[id] = best45670[r];
-            if(attackDestinationID[id] == -1)   attackDestinationID[id] = best45670[3];
-            attackNextDestinationID[id] = best45670[3];
+            int r = (int)(Math.random() * 100) % list.size();
+            while(l.contains(list.get(r))){
+                r = (int)(Math.random() * 100) % list.size();
+            }
+            attackDestinationID[id] = list.get(r);
+            l.add(list.get(r));
+//            if(attackDestinationID[id] == -1)   attackDestinationID[id] = best45670[3];
+//            attackNextDestinationID[id] = best45670[3];
         }
     }
 
