@@ -388,6 +388,7 @@ public class Main {
                             }
                         }
                     }
+                    if (path.size() == 0)   continue;
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
                     if(jump == 0){
                         BetterMove.adjustMovement(wb, robot);
