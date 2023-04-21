@@ -322,7 +322,7 @@ public class Robot {
 
         Workbench enemyWB = enemyWorkbenches.get(attackDestinationID);
         //机器人到达攻击目的地
-        if (Tool.calDistanceByXY(x, y, enemyWB.getX(), enemyWB.getY()) < 0.5) {
+        if (Tool.calDistanceByXY(x, y, enemyWB.getX(), enemyWB.getY()) < 2) {
             if (framesOfStay > 500) {
                 //逗留够久了，去下一个攻击点
                 dc.changeRobotAttackDestinationIDByRobotID(robotID, attackNextDestinationID);
