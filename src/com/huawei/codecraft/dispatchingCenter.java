@@ -14,13 +14,13 @@ public class dispatchingCenter {
     //记录robots的next目的工作台的ID
     private int[] robotsNextDestinationID = new int[]{-1, -1, -1, -1};
     //记录robots预定的收购工作台的出售名额是否预定
-    private int[] isBookSellBuyWB = new int[]{0, 0, 0, 0};
+    public int[] isBookSellBuyWB = new int[]{0, 0, 0, 0};
     //记录(商品ID,[工作台列表])  收购该商品的工作台   初始化后不变
     private HashMap<Integer, List<Integer>> mapWB = new HashMap<>();
     //记录(商品ID,[被占用的工作台列表])  收购该商品的工作台
     private HashMap<Integer, List<Integer>> mapWBX = new HashMap<>();
     //记录<被占用的工作台列表>  出售该商品的工作台
-    private HashSet<Integer> setWBX = new HashSet<>();
+    public HashSet<Integer> setWBX = new HashSet<>();
     //记录机器人有物品但卖不出的帧数
     private int[] framesOfNoWayToSellWithGoods = new int[]{0, 0, 0, 0};
     //记录买的商品ID，用于防止跳帧买不到商品，不知道商品而无法解除预定
@@ -135,6 +135,13 @@ public class dispatchingCenter {
         for (int robotId = 0; robotId < 4; robotId++) {
             //如果是进攻就跳过
             if(Main.robotsToAttack.contains(robotId))   continue;
+            //如果蓝方机器人进行冲撞，也跳过
+            if (Main.team.equals("BLUE")) {
+                int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                if (stopXY_tmp != null) {
+                    continue;
+                }
+            }
 
             //无目的地  放入robotsToBuySell
             if(robotsDestinationID[robotId] == -1 && robotsNextDestinationID[robotId] == -1){

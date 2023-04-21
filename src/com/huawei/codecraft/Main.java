@@ -274,9 +274,9 @@ public class Main {
                         if (stopXY_tmp != null) {
                             int[] startXY = robot.getMatXY();
                             robot.changeMapXY(map, startXY);
-                            int[] stopXY = stopXY_tmp;
                             int hasGood = robot.getGoodID() == 0 ? 0 : 1;
-                            List<int[]> path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
+                            List<int[]> path = SearchAlgorithm.astar(startXY, stopXY_tmp, map, hasGood, 1);
+                            Collections.reverse(path);
                             robotsPath.add(path);
                         }else{
                             robotsPath.add(new ArrayList<>());
@@ -301,6 +301,17 @@ public class Main {
                             if (stopXY_tmp != null) {
                                 stopXY = stopXY_tmp;
                                 //System.err.println("追击机器人");
+                                //解除预定
+                                if(robot.getGoodID() == 0){
+                                    dc.setOffDestAndNextDestAndNoBookWB(robotId, dc.findDestinationIDByRobotID(robotId), dc.findNextDestinationIDByRobotID(robotId), dc.isBookSellBuyWB[robotId], workbenches);
+                                }else{
+                                    dc.deleteWBXByGoodIDAndWBID(robot.getGoodID(), dc.findDestinationIDByRobotID(robotId));
+                                    if(dc.isBookSellBuyWB[robotId] == 1){
+                                        dc.isBookSellBuyWB[robotId] = 0;
+                                        dc.setWBX.remove(dc.findDestinationIDByRobotID(robotId));
+                                    }
+                                    dc.changeRobotDestinationIDByRobotID(robotId, -1);
+                                }
                             }
                         }
                     }
@@ -401,6 +412,15 @@ public class Main {
                         //防止原地抽搐
                         wb = workbenches.get(destinationID);
                         BetterMove.adjustMovement(wb, robot);
+                    }else{
+                        if (Main.team.equals("BLUE")) {
+                            int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                            if (stopXY_tmp != null) {
+                                wb.setY(stopXY_tmp[0] * 0.5 + 0.25);
+                                wb.setX(stopXY_tmp[1] * 0.5 + 0.25);
+                                BetterMove.adjustMovement(wb, robot);
+                            }
+                        }
                     }
                 }else{
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
