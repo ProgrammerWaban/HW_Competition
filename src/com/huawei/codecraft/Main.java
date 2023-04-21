@@ -361,43 +361,20 @@ public class Main {
                 int destinationID = dc.findDestinationIDByRobotID(robotId);
                 int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotId);
                 Workbench wb = new Workbench();
-                if(destinationID > -1 || attackDestinationID > -1){
-                    List<int[]> path = robotsPath.get(robotId);
-                    if (path.size() == 0 || path.size() == 1) {
-                        if(destinationID > -1){
-                            //防止原地抽搐
-                            wb = workbenches.get(destinationID);
-                            BetterMove.adjustMovement(wb, robot);
-                            continue;
-                        }
-                        if (attackDestinationID > -1) {
-                            //这里放置撞敌人
-                            //这里用以计算蓝方机器人是否进行冲撞
-                            if (team.equals("BLUE")) {
-                                int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
-                                if (stopXY_tmp != null) {
-                                    robot.setFramesOfStay(0);
-                                    wb.setX(stopXY_tmp[1]*0.5+0.25);
-                                    wb.setY(stopXY_tmp[0]*0.5+0.25);
-                                    BetterMove.adjustMovementJump(wb, robot);
-                                    continue;
-                                }
-                            }
-                            else {
-                                continue;
-                            }
-                        }
+                List<int[]> path = robotsPath.get(robotId);
+                if (path.size() == 0 || path.size() == 1) {
+                    if(destinationID > -1){
+                        //防止原地抽搐
+                        wb = workbenches.get(destinationID);
+                        BetterMove.adjustMovement(wb, robot);
                     }
-                    if (path.size() == 0)   continue;
+                }else{
                     int jump = BetterMove.binarySearchDestination(map, path, robot, wb);
                     if(jump == 0){
                         BetterMove.adjustMovement(wb, robot);
                     }else{
                         BetterMove.adjustMovementJump(wb, robot);
                     }
-                }else{
-                    robot.setWantRotate(0);
-                    robot.setWantForward(0);
                 }
                 //靠经墙壁减速(其实这里也可以设置成只有红方才执行)
                 //BetterMove.closeToWall_slowDown(map_clone, robot, 1.8);
