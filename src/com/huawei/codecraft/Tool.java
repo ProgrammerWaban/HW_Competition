@@ -133,7 +133,7 @@ public class Tool {
                 if (robot.getRadar()[radarIndexDown] > distance && robot.getRadar()[radarIndexUp] > distance) {
                     dead_workbench.setAlive(true);
                     iterator.remove(); //雷达观测到工作台位置为空，将其从死工作台中删除
-                    System.err.println(dead_workbench.getID() + " 被复活");
+                    //System.err.println(dead_workbench.getID() + " 被复活");
                     break;  //这个break可不能忘了
                 }
             }
