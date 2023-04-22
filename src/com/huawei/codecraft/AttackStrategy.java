@@ -13,12 +13,16 @@ public class AttackStrategy {
 
     //蓝方攻击启动函数
     public static int[] blueTeamAttack(int robotID) {
+        if(Main.robotsToAttack.size() == 1 && Main.robotsToAttack.get(0) != robotID){
+            Main.robotsToAttack.clear();
+        }
+
         avoidMultiAttack();
 
         //上面的数组中已经存了各个机器人对应的共计目标了，此时只需判断距离是否小于一定值就去冲撞目标
         List<Double> list = toEnemyRobotDistance.getOrDefault(robotID, null);
         //距离小于5的时候才触发冲撞逻辑
-        if (list != null && list.get(2) < 5) {
+        if (list != null && list.get(2) < 3.6) {
             return new int[]{(int) list.get(0).doubleValue(), (int) list.get(1).doubleValue()};
         } else {
             return null;
