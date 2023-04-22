@@ -37,6 +37,7 @@ public class Main {
     //记录一个工作台死了多少秒
     private static Map<Workbench, Integer> dead_time_wb = new HashMap<>();
     private static Map<Workbench, Integer> alive_time_wb = new HashMap<>();
+    private static boolean threeone = false;
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -109,6 +110,7 @@ public class Main {
                 robotsToAttack.add(i);
             }
         }
+        if(robotsToAttack.size() == 1)  threeone = true;
         if("BLUE".equals(team) && robotsToAttack.size() == 0){
             robotsToAttack.add(3);
         }
@@ -269,7 +271,7 @@ public class Main {
                 Workbench enemyWB = attackDestinationID == -1 ? null : enemyWorkbenches.get(attackDestinationID);
                 if(wb == null && enemyWB == null){
                     //这里用以计算蓝方机器人是否进行冲撞
-                    if (team.equals("BLUE")) {
+                    if (team.equals("BLUE") && !threeone) {
                         int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
                         if (stopXY_tmp != null) {
                             int[] startXY = robot.getMatXY();
@@ -295,7 +297,7 @@ public class Main {
                     else
                         stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
                     //这里用以计算蓝方机器人是否进行冲撞
-                    if (team.equals("BLUE")) {
+                    if (team.equals("BLUE") && !threeone) {
                         if (!(robot.getGoodID() == 4 || robot.getGoodID() == 5 || robot.getGoodID() == 6 || robot.getGoodID() == 7)) {
                             int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
                             if (stopXY_tmp != null) {
@@ -413,7 +415,7 @@ public class Main {
                         wb = workbenches.get(destinationID);
                         BetterMove.adjustMovement(wb, robot);
                     }else{
-                        if (Main.team.equals("BLUE")) {
+                        if (Main.team.equals("BLUE") && !threeone) {
                             int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
                             if (stopXY_tmp != null) {
                                 wb.setY(stopXY_tmp[0] * 0.5 + 0.25);
