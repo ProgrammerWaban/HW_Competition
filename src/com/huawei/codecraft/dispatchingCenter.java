@@ -136,7 +136,7 @@ public class dispatchingCenter {
             //如果是进攻就跳过
             if(Main.robotsToAttack.contains(robotId))   continue;
             //如果蓝方机器人进行冲撞，也跳过
-            if (Main.team.equals("BLUE")) {
+            if (Main.team.equals("BLUE")  && !Main.threeone) {
                 int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
                 if (stopXY_tmp != null) {
                     continue;
@@ -851,6 +851,7 @@ public class dispatchingCenter {
             boolean toAttack = true;
             //不在进攻列表，就判断10秒内有没有工作，没有就也去进攻
             if (!robotIdToAttack.contains(i)) {
+                if ("RED".equals(Main.team))    continue;
                 if (robotsDestinationID[i] == -1 && robotsNextDestinationID[i] == -1 && robot.getGoodID() == 0) {
                     if (framesOfNoWork[i] < 500) {
                         framesOfNoWork[i]++;

@@ -37,7 +37,7 @@ public class Main {
     //记录一个工作台死了多少秒
     private static Map<Workbench, Integer> dead_time_wb = new HashMap<>();
     private static Map<Workbench, Integer> alive_time_wb = new HashMap<>();
-    private static boolean threeone = false;
+    public static boolean threeone = false;
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -168,7 +168,17 @@ public class Main {
             }
             //改变map_clone,顺便存储机器人到地方机器人的距离及点位
             if (team.equals("RED")) {
+//                for (int i = 0; i < robots.size(); i++) {
+//                    Robot robot = robots.get(i);
+//                    robot.radarCheck(map_clone, map, robots, i);
+//                }
                 for (int i = 0; i < robots.size(); i++) {
+                    //蓝方机器人遍历前得先初始化下AttackStrategy的参数
+                    if (i == 0) {
+                        AttackStrategy.toEnemyRobotDistance.clear();
+                    }
+                    AttackStrategy.tmp_distance = Double.MAX_VALUE;
+
                     Robot robot = robots.get(i);
                     robot.radarCheck(map_clone, map, robots, i);
                 }
@@ -209,6 +219,9 @@ public class Main {
                     }
                 }
             }
+
+            //复活工作台
+            Tool.radarAliveWorkbench(dead_Workbench, robots);
 
             //调度中心
             dc.dispatching(robots, workbenches);
@@ -270,21 +283,56 @@ public class Main {
                 int attackDestinationID = dc.findAttackDestinationIDByRobotID(robotId);
                 Workbench enemyWB = attackDestinationID == -1 ? null : enemyWorkbenches.get(attackDestinationID);
                 if(wb == null && enemyWB == null){
-                    //这里用以计算蓝方机器人是否进行冲撞
-                    if (team.equals("BLUE") && !threeone) {
-                        int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
-                        if (stopXY_tmp != null) {
+                    if("RED".equals(team)){
+                        if(dead_Workbench.size() != 0 && robot.getGoodID() == 0){
                             int[] startXY = robot.getMatXY();
                             robot.changeMapXY(map, startXY);
-                            int hasGood = robot.getGoodID() == 0 ? 0 : 1;
-                            List<int[]> path = SearchAlgorithm.astar(startXY, stopXY_tmp, map, hasGood, 1);
+                            int i = 0;
+                            while(i < dead_Workbench.size() && !dead_Workbench.get(i).isEnemyNotOn){
+                                i++;
+                            }
+                            if(i == dead_Workbench.size()){
+                                robotsPath.add(new ArrayList<>());
+                                continue;
+                            }
+                            Workbench deadWB = dead_Workbench.get(i);
+                            int[] stopXY;
+                            if(SafePlace[robotId][0]==-1&&SafePlace[robotId][1]==-1)
+                                stopXY = new int[]{deadWB.getxMap(), deadWB.getyMap()};
+                            else
+                                stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
+                            int hasGood = 0;
+                            double[][] distMat = deadWB.getDistMatWithNoGood();
+                            List<int[]> path;
+                            if (SafePlace[robotId][0] == -1 && SafePlace[robotId][1] == -1) {
+                                    path = SearchAlgorithm.astar(startXY, stopXY, map_clone, distMat, hasGood);
+                            } else {
+                                    path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+                            }
                             Collections.reverse(path);
                             robotsPath.add(path);
+                            System.err.println("去看deadWB");
                         }else{
                             robotsPath.add(new ArrayList<>());
                         }
-                    }else{
-                        robotsPath.add(new ArrayList<>());
+                    }
+                    if("BLUE".equals(team)){
+                        //这里用以计算蓝方机器人是否进行冲撞
+                        if (!threeone) {
+                            int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                            if (stopXY_tmp != null) {
+                                int[] startXY = robot.getMatXY();
+                                robot.changeMapXY(map, startXY);
+                                int hasGood = robot.getGoodID() == 0 ? 0 : 1;
+                                List<int[]> path = SearchAlgorithm.astar(startXY, stopXY_tmp, map, hasGood, 1);
+                                Collections.reverse(path);
+                                robotsPath.add(path);
+                            }else{
+                                robotsPath.add(new ArrayList<>());
+                            }
+                        }else{
+                            robotsPath.add(new ArrayList<>());
+                        }
                     }
                 }
                 //工作路线
@@ -353,11 +401,9 @@ public class Main {
                     else
                         stopXY = new int[]{SafePlace[robotId][0],SafePlace[robotId][1]};
                     //这里用以计算蓝方机器人是否进行冲撞
-                    if (team.equals("BLUE")) {
-                        int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
-                        if (stopXY_tmp != null) {
-                            stopXY = stopXY_tmp;
-                        }
+                    int[] stopXY_tmp = AttackStrategy.blueTeamAttack(robotId);
+                    if (stopXY_tmp != null) {
+                        stopXY = stopXY_tmp;
                     }
                     double[][] distMat = enemyWB.getDistMatWithGood();
                     int hasGood = 1;
@@ -377,13 +423,13 @@ public class Main {
                         if (team.equals("BLUE")) {
                             path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
                         } else {
-                            path = SearchAlgorithm.astar(startXY, stopXY, map_clone, distMat, hasGood);
+                            path = SearchAlgorithm.astar(startXY, stopXY, map, distMat, hasGood);
                         }
                     } else {
                         if (team.equals("BLUE")) {
                             path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
                         } else {
-                            path = SearchAlgorithm.astar(startXY, stopXY, map_clone, hasGood, 1);
+                            path = SearchAlgorithm.astar(startXY, stopXY, map, hasGood, 1);
                         }
                     }
                     Collections.reverse(path);

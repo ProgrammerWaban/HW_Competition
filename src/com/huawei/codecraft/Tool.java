@@ -1,13 +1,15 @@
 package com.huawei.codecraft;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Tool {
     private Tool() {
     }
+
     //求弧度差 以第一个点为基准
-    public static double calAngle(double x1, double y1, double x2, double y2){
+    public static double calAngle(double x1, double y1, double x2, double y2) {
         double xDiff = x2 - x1;
         double yDiff = y2 - y1;
         double angle = Math.atan2(yDiff, xDiff);
@@ -27,23 +29,23 @@ public class Tool {
     }
 
     //根据坐标计算距离
-    public static double calDistanceByXY(double x1, double y1, double x2, double y2){
+    public static double calDistanceByXY(double x1, double y1, double x2, double y2) {
         double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
         return distance;
     }
 
     //2个list求差集 A-B
-    public static List<Integer> calDifferenceWithABList(List<Integer> A, List<Integer> B){
-        if(B == null)   return A;
+    public static List<Integer> calDifferenceWithABList(List<Integer> A, List<Integer> B) {
+        if (B == null) return A;
         List<Integer> list = new ArrayList<>();
-        for(Integer a : A){
-            if(!B.contains(a))  list.add(a);
+        for (Integer a : A) {
+            if (!B.contains(a)) list.add(a);
         }
         return list;
     }
 
     //交换list里的i,j的值
-    public static void changeListValueByAB(List<Integer> list, int A, int B){
+    public static void changeListValueByAB(List<Integer> list, int A, int B) {
         int temp = list.get(A);
         list.set(A, list.get(B));
         list.set(B, temp);
@@ -102,5 +104,39 @@ public class Tool {
             }
         }
         return false;
+    }
+
+    //雷达监测地图，如果探照到工作台就复活工作台
+    /*
+    for deadworkbench
+    for robots
+    计算机器人到工作台的角度
+    计算期间距离
+    取两条雷达进行检测
+    只有当两条雷达长度都大于机器人到工作台的距离才进行复活工作台
+     */
+    public static void radarAliveWorkbench(ArrayList<Workbench> dead_Workbenchs, ArrayList<Robot> robots) {
+        Iterator<Workbench> iterator = dead_Workbenchs.iterator();
+        while (iterator.hasNext()) {
+            Workbench dead_workbench = iterator.next();
+            if (!dead_workbench.isEnemyNotOn) {
+                continue;
+            }
+            for (Robot robot : robots) {
+                double distance = calDistanceByXY(robot.getX(), robot.getY(), dead_workbench.getX(), dead_workbench.getY());
+                double angle = calAngle(robot.getX(), robot.getY(), dead_workbench.getX(), dead_workbench.getY());
+                double radarAngle = angle - robot.getIntendAngle();
+                radarAngle = radarAngle > 0 ? radarAngle : radarAngle + 2 * Math.PI;
+                double radarIndex = Math.toDegrees(radarAngle);
+                int radarIndexUp = (int) Math.ceil(radarIndex) % 360;
+                int radarIndexDown = (int) Math.floor(radarIndex) % 360;
+                if (robot.getRadar()[radarIndexDown] > distance && robot.getRadar()[radarIndexUp] > distance) {
+                    dead_workbench.setAlive(true);
+                    iterator.remove(); //雷达观测到工作台位置为空，将其从死工作台中删除
+                    System.err.println(dead_workbench.getID() + " 被复活");
+                    break;  //这个break可不能忘了
+                }
+            }
+        }
     }
 }
