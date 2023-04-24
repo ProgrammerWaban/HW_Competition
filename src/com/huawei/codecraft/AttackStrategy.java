@@ -13,9 +13,9 @@ public class AttackStrategy {
 
     //蓝方攻击启动函数
     public static int[] blueTeamAttack(int robotID) {
-        if(Main.robotsToAttack.size() == 1 && Main.robotsToAttack.get(0) != robotID){
-            Main.robotsToAttack.clear();
-        }
+//        if(Main.robotsToAttack.size() == 1 && Main.robotsToAttack.get(0) != robotID){
+//            Main.robotsToAttack.clear();
+//        }
 
         avoidMultiAttack();
 
